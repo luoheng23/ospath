@@ -1,4 +1,5 @@
 
+
 public class BasePath {
     static let curdir = "."
     static let pardir = ".."
@@ -55,7 +56,7 @@ extension BasePath {
     // split a path in head (everything up to the last '/') and tail (the rest)
     // if head is like usr////, remove tailed '/'
     public class func split(_ path: String) -> (head: String, tail: String) {
-        let lastSepIndex = path.lastIndex(where: { $0 == sep.first })
+        let lastSepIndex = Path.rIndexOf(path, sep)
         var (head, tail) = (path[..<lastSepIndex], path[lastSepIndex...])
         if !head.allSatisfy({ $0 == sep.first }) {
             var i = head.endIndex
@@ -75,8 +76,25 @@ extension BasePath {
     }
 
     public class func basename(_ path: String) -> String {
-        let lastSepIndex = path.lastIndex(where: { $0 == sep.first }) ?? path.startIndex
-        return path[lastSepIndex]
-       
+        let (_, name) = split(path)
+        return name
     }
+
+    public class func dirname(_ path: String) -> String {
+        let (name, _) = split(path)
+        return name
+    }
+
+    public class func islink(_ path: String) -> Bool {
+        do {
+            let _ = try Path.fileManager.destinationOfSymbolicLink(atPath: path)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+
+
+
 }
