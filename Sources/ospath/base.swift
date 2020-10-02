@@ -1,4 +1,5 @@
 
+import Foundation
 
 public class BasePath {
     static let curdir = "."
@@ -87,14 +88,20 @@ extension BasePath {
 
     public class func islink(_ path: String) -> Bool {
         do {
-            let _ = try Path.fileManager.destinationOfSymbolicLink(atPath: path)
+
+            let _ = try Path.fileManager.attributesOfItem(atPath: path)
             return true
         } catch {
             return false
         }
     }
 
-
-
-
+    public class func lexists(_ path: String) -> Bool {
+        do {
+            let _ = try Path.fileManager.destinationOfSymbolicLink(atPath: path)
+            return true
+        } catch {
+            return false
+        }
+    }
 }
