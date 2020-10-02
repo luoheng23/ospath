@@ -27,9 +27,27 @@ final class PosixPathTests: XCTestCase {
         XCTAssert(PosixPath.split("//foo//bar") == ("//foo", "bar"))
     }
 
+    func testBasename() {
+        XCTAssertEqual(PosixPath.basename("/foo/bar"), "bar")
+        XCTAssertEqual(PosixPath.basename("/"), "")
+        XCTAssertEqual(PosixPath.basename("foo"), "foo")
+        XCTAssertEqual(PosixPath.basename("////foo"), "foo")
+        XCTAssertEqual(PosixPath.basename("//foo//bar"), "bar")
+    }
+
+    func testDirname() {
+        XCTAssertEqual(PosixPath.dirname("/foo/bar"), "/foo")
+        XCTAssertEqual(PosixPath.dirname("/"), "/")
+        XCTAssertEqual(PosixPath.dirname("foo"), "")
+        XCTAssertEqual(PosixPath.dirname("////foo"), "////")
+        XCTAssertEqual(PosixPath.dirname("//foo//bar"), "//foo")
+    }
+
     static var allTests = [
         ("testIsabs", testIsabs),
         ("testJoin", testJoin),
         ("testSplit", testSplit),
+        ("testBasename", testBasename),
+        ("testDirname", testDirname),
     ]
 }
