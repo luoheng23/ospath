@@ -1,6 +1,6 @@
 # ospath
-
-this package aims to provide same functions with os.path module in python.
+![ospath](https://github.com/luoheng23/ospath/workflows/Swift/badge.svg)
+This package aims to provide same functions as os.path module in python.
 
 ## Example
 ```swift
@@ -11,7 +11,7 @@ PosixPath.basename("/home/hello") // hello
 ```
 
 ## Installation
-Put the following string in the dependencies of your Package.swift
+Put the following string in the dependencies of your `Package.swift`
 ```swift
 .package(url: "https://github.com/luoheng23/ospath", from: "1.0.0")
 ```
