@@ -57,8 +57,15 @@ extension BasePath {
     // split a path in head (everything up to the last '/') and tail (the rest)
     // if head is like usr////, remove tailed '/'
     public class func split(_ path: String) -> (head: String, tail: String) {
-        let lastSepIndex = Path.rIndexOf(path, sep)
-        var (head, tail) = (path[..<lastSepIndex], path[lastSepIndex...])
+        var lastIndex: String.Index
+        if let pos = path.lastIndex(where: { $0 == sep.first }) {
+            lastIndex = path.index(after: pos)
+        } else {
+            lastIndex = path.startIndex
+        }
+
+        var (head, tail) = (path[..<lastIndex], path[lastIndex...])
+
         if !head.allSatisfy({ $0 == sep.first }) {
             var i = head.endIndex
             while i != head.startIndex {
