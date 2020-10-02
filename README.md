@@ -13,7 +13,7 @@ PosixPath.basename("/home/hello") // hello
 ## Installation
 Put the following string in the dependencies of your Package.swift
 ```swift
-.package(url: "https://github.com/luoheng23/ospath", from: "0.1")
+.package(url: "https://github.com/luoheng23/ospath", from: "1.0.0")
 ```
 
 ## TODO
