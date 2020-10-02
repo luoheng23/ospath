@@ -1,5 +1,6 @@
 # ospath
 ![ospath](https://github.com/luoheng23/ospath/workflows/Swift/badge.svg)
+
 This package aims to provide same functions as os.path module in python.
 
 ## Example
