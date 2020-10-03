@@ -27,6 +27,34 @@ final class PosixPathTests: XCTestCase {
         XCTAssert(PosixPath.split("//foo//bar") == ("//foo", "bar"))
     }
 
+    func splitextTest(_ path: String, _ filename: String, _ ext: String) {
+        XCTAssert(PosixPath.splitext(path) == (filename, ext))
+        XCTAssert(PosixPath.splitext("/" + path) == ("/" + filename, ext))
+        XCTAssert(PosixPath.splitext("abc/" + path) ==
+                         ("abc/" + filename, ext))
+        XCTAssert(PosixPath.splitext("abc.def/" + path) ==
+                         ("abc.def/" + filename, ext))
+        XCTAssert(PosixPath.splitext("/abc.def/" + path) ==
+                         ("/abc.def/" + filename, ext))
+        XCTAssert(PosixPath.splitext(path + "/") ==
+                         (filename + ext + "/", ""))
+    }
+
+    func testSplitext() {
+        splitextTest("foo.bar", "foo", ".bar")
+        splitextTest("foo.boo.bar", "foo.boo", ".bar")
+        splitextTest("foo.boo.biff.bar", "foo.boo.biff", ".bar")
+        splitextTest(".csh.rc", ".csh", ".rc")
+        splitextTest("nodots", "nodots", "")
+        splitextTest(".cshrc", ".cshrc", "")
+        splitextTest("...manydots", "...manydots", "")
+        splitextTest("...manydots.ext", "...manydots", ".ext")
+        splitextTest(".", ".", "")
+        splitextTest("..", "..", "")
+        splitextTest("........", "........", "")
+        splitextTest("", "", "")
+    }
+
     func testBasename() {
         XCTAssertEqual(PosixPath.basename("/foo/bar"), "bar")
         XCTAssertEqual(PosixPath.basename("/"), "")
@@ -47,6 +75,7 @@ final class PosixPathTests: XCTestCase {
         ("testIsabs", testIsabs),
         ("testJoin", testJoin),
         ("testSplit", testSplit),
+        ("testSplitext", testSplitext),
         ("testBasename", testBasename),
         ("testDirname", testDirname),
     ]

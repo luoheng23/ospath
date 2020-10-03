@@ -79,6 +79,10 @@ extension BasePath {
         return (String(head), String(tail))
     }
 
+    public class func splitext(_ path: String) -> (head: String, tail: String) {
+        return Path.splitext(path: path, sep: sep, altsep: altsep, extsep: extsep)
+    }
+
     public class func splitdrive(_ path: String) -> (head: String, tail: String) {
         return ("", path)
     }
