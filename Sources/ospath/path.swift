@@ -100,7 +100,6 @@ extension BasePath {
     do {
 
       let attrs = try Path.fileManager.attributesOfItem(atPath: path)
-      // print("attr: ", attr.count, attr[FileAttributeKey(rawValue: "NSFileType")] ?? "")
       if let attr = attrs[FileAttributeKey(rawValue: "NSFileType")] {
         return (attr as! FileAttributeType) == FileAttributeType.typeSymbolicLink
       }
@@ -137,5 +136,41 @@ extension BasePath {
       return isDir.boolValue
     }
     return false
+  }
+
+  public class func ismount(_ path: String) {
+    
+  }
+}
+
+// access to file
+extension BasePath {
+
+  public class func getsize(_ filename: String) -> Int {
+    do {
+      let attrs = try Path.fileManager.attributesOfItem(atPath: path)
+      if let attr = attrs[FileAttributeKey(rawValue: "NSFileType")] {
+        // return (attr as! FileAttributeType) == FileAttributeType.typeSymbolicLink
+      }
+      return 1
+    } catch {
+      return 0
+    }
+  }
+
+  public class func isReadable(_ filename: String) -> Bool {
+    return Path.fileManager.isReadableFile(atPath: filename)
+  }
+
+  public class func isWritable(_ filename: String) -> Bool {
+    return Path.fileManager.isWritableFile(atPath: filename)
+  }
+
+  public class func isExecutable(_ filename: String) -> Bool {
+    return Path.fileManager.isExecutableFile(atPath: filename)
+  }
+
+  public class func isDeletable(_ filename: String) -> Bool {
+    return Path.fileManager.isDeletableFile(atPath: filename)
   }
 }

@@ -1,24 +1,77 @@
 import Foundation
 
-class OS {
+public class OS {
 
-  static func symlink(_ dst: String, _ at: String) throws {
+  public static func symlink(_ dst: String, _ at: String) throws {
     try Path.fileManager.createSymbolicLink(atPath: at, withDestinationPath: dst)
   }
 
-  static func symlink(_ dst: URL, _ at: URL) throws {
+  public static func symlink(_ dst: URL, _ at: URL) throws {
     try Path.fileManager.createSymbolicLink(at: at, withDestinationURL: dst)
   }
 
-  static func remove(_ file: String) throws {
+  public static func link(_ at: String, _ dst: String) throws {
+    try Path.fileManager.linkItem(atPath: at, toPath: dst)
+  }
+
+  public static func link(_ at: URL, _ dst: URL) throws {
+    try Path.fileManager.linkItem(at: at, to: dst)
+  }
+
+  public static func readlink(_ link: String) throws -> String {
+    return try Path.fileManager.destinationOfSymbolicLink(atPath: link)
+  }
+
+  public static func remove(_ file: String) throws {
     try Path.fileManager.removeItem(atPath: file)
   }
 
-  static func remove(_ file: URL) throws {
+  public static func remove(_ file: URL) throws {
     try Path.fileManager.removeItem(at: file)
   }
 
-  static func open(_ file: String) -> Bool {
+  public static func copy(_ file: String, _ dst: String) throws {
+    try Path.fileManager.copyItem(atPath: file, toPath: dst)
+  }
+
+  public static func copy(_ file: URL, _ dst: URL) throws {
+    try Path.fileManager.copyItem(at: file, to: dst)
+  }
+
+  public static func move(_ file: String, _ dst: String) throws {
+    try Path.fileManager.moveItem(atPath: file, toPath: dst)
+  }
+
+  public static func move(_ file: URL, _ dst: URL) throws {
+    try Path.fileManager.moveItem(at: file, to: dst)
+  }
+
+  public static func open(_ file: String) -> Bool {
     return Path.fileManager.createFile(atPath: file, contents: nil)
   }
+
+  public static func mkdir(_ dir: String) throws {
+    try Path.fileManager.createDirectory(atPath: dir, withIntermediateDirectories: false)
+  }
+
+  public static func mkdir(_ dir: URL) throws {
+    try Path.fileManager.createDirectory(at: dir, withIntermediateDirectories: false)
+  }
+
+  public static func makedirs(_ dir: String) throws {
+    try Path.fileManager.createDirectory(atPath: dir, withIntermediateDirectories: true)
+  }
+
+  public static func makedirs(_ dir: URL) throws {
+    try Path.fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+  }
+}
+
+
+extension OS {
+
+  public static func stat(_ path: String) throws -> StatResult {
+    let attrs = try Path.fileManager.attributesOfItem(path)
+    print(attr)
+    return StatResult()
 }
