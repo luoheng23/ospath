@@ -72,7 +72,30 @@ final class PosixPathTests: XCTestCase {
     }
 
     func testIslink() {
+        let filename = "sdafsdfhdsufhisfu232u3fjdsjhfksfs"
+        let newfile = filename + "1"
+        let link = filename + "2"
+        _ = try? OS.remove(newfile)
+        _ = try? OS.remove(link)
+        XCTAssertEqual(PosixPath.islink(newfile), false)
+        XCTAssertEqual(PosixPath.lexists(link), false)
+        XCTAssertEqual(PosixPath.islink(newfile), false)
+
+        if OS.open(newfile) {
+            _ = try? OS.symlink(newfile, link)
+            XCTAssertEqual(PosixPath.islink(link), true)
+            let _ = try? OS.remove(newfile)
+            XCTAssertEqual(PosixPath.islink(link), true)
+            XCTAssertEqual(PosixPath.exists(link), false)
+            XCTAssertEqual(PosixPath.lexists(link), true)
+            let _ = try? OS.remove(link)
+        }
     }
+
+    func testIsfile() {
+        XCTAssertTrue(PosixPath.isfile("README.md"))
+    }
+
 
     static var allTests = [
         ("testIsabs", testIsabs),
