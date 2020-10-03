@@ -245,6 +245,7 @@ extension BasePath {
 }
 
 extension BasePath {
+  @available(macOS 10.12, *)
   public class func expanduser(_ path: String) -> String {
     if !path.hasPrefix(tilde) {
       return path
