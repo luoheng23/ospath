@@ -94,6 +94,7 @@ final class PosixPathTests: XCTestCase {
 
     func testIsfile() {
         XCTAssertTrue(PosixPath.isfile("README.md"))
+        XCTAssertFalse(PosixPath.isfile("Sources"))
     }
 
 
