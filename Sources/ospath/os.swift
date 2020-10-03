@@ -71,7 +71,22 @@ public class OS {
 extension OS {
 
   public static func stat(_ path: String) throws -> StatResult {
-    let attrs = try Path.fileManager.attributesOfItem(path)
-    print(attr)
-    return StatResult()
+    do {
+      let attrs = try Path.fileManager.attributesOfItem(atPath: path)
+      let stat = StatResult()
+      stat.st_mode = (attrs[.posixPermissions] as? NSNumber)?.intValue ?? -1
+      stat.st_dev = attrs[.deviceIdentifier] as? Int ?? -1
+      stat.st_nlink = attrs[.referenceCount] as? Int ?? -1
+      stat.st_uid = attrs[.ownerAccountID] as? Int ?? -1
+      stat.st_gid = attrs[.groupOwnerAccountID] as? Int ?? -1
+      stat.st_size = attrs[.size] as? Int ?? -1
+      stat.st_mtime = (attrs[.modificationDate] as? Date)?.timeIntervalSince1970 ?? -1
+      stat.st_ctime = (attrs[.creationDate] as? Date)?.timeIntervalSince1970 ?? -1
+      // TODO Find a way to get the access time
+      stat.st_atime = -1
+      return stat
+    } catch {
+      return StatResult()
+    }
+  }
 }

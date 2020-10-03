@@ -98,10 +98,9 @@ extension BasePath {
 
   public class func islink(_ path: String) -> Bool {
     do {
-
       let attrs = try Path.fileManager.attributesOfItem(atPath: path)
-      if let attr = attrs[FileAttributeKey(rawValue: "NSFileType")] {
-        return (attr as! FileAttributeType) == FileAttributeType.typeSymbolicLink
+      if let attr = attrs[.type] {
+        return (attr as! FileAttributeType) == .typeSymbolicLink
       }
       return false
     } catch {
@@ -139,7 +138,7 @@ extension BasePath {
   }
 
   public class func ismount(_ path: String) {
-    
+
   }
 }
 
@@ -148,8 +147,8 @@ extension BasePath {
 
   public class func getsize(_ filename: String) -> Int {
     do {
-      let attrs = try Path.fileManager.attributesOfItem(atPath: path)
-      if let attr = attrs[FileAttributeKey(rawValue: "NSFileType")] {
+      let attrs = try Path.fileManager.attributesOfItem(atPath: filename)
+      if let _ = attrs[.type] {
         // return (attr as! FileAttributeType) == FileAttributeType.typeSymbolicLink
       }
       return 1
