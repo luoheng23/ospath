@@ -97,6 +97,11 @@ final class PosixPathTests: XCTestCase {
         XCTAssertFalse(PosixPath.isfile("Sources"))
     }
 
+    func testIsdir() {
+        XCTAssertFalse(PosixPath.isdir("README.md"))
+        XCTAssertTrue(PosixPath.isdir("Sources"))
+    }
+
 
     static var allTests = [
         ("testIsabs", testIsabs),
@@ -106,5 +111,7 @@ final class PosixPathTests: XCTestCase {
         ("testBasename", testBasename),
         ("testDirname", testDirname),
         ("testIslink", testIslink),
+        ("testIsfile", testIsfile),
+        ("testIsdir", testIsdir),
     ]
 }

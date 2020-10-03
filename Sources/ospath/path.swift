@@ -130,4 +130,12 @@ extension BasePath {
     }
     return false
   }
+
+  public class func isdir(_ path: String) -> Bool {
+    var isDir: ObjCBool = false
+    if Path.fileManager.fileExists(atPath: path, isDirectory: &isDir) {
+      return isDir.boolValue
+    }
+    return false
+  }
 }
