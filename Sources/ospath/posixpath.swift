@@ -1,2 +1,1 @@
-
 class PosixPath: BasePath {}

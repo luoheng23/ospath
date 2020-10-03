@@ -71,6 +71,9 @@ final class PosixPathTests: XCTestCase {
         XCTAssertEqual(PosixPath.dirname("//foo//bar"), "//foo")
     }
 
+    func testIslink() {
+    }
+
     static var allTests = [
         ("testIsabs", testIsabs),
         ("testJoin", testJoin),
@@ -78,5 +81,6 @@ final class PosixPathTests: XCTestCase {
         ("testSplitext", testSplitext),
         ("testBasename", testBasename),
         ("testDirname", testDirname),
+        ("testIslink", testIslink),
     ]
 }

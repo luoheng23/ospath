@@ -1,3 +1,2 @@
-
 // TODO
 class NtPath: BasePath {}
