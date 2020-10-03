@@ -4,6 +4,7 @@ public class BasePath {
   static let curdir = "."
   static let pardir = ".."
   static let extsep = "."
+  static let tilde = "~"
 
   class var sep: String {
     return "/"  // posix path
@@ -137,8 +138,16 @@ extension BasePath {
     return false
   }
 
-  public class func ismount(_ path: String) {
-
+  public class func ismount(_ path: String) -> Bool {
+    do {
+      let _ = try OS.stat(path)
+      if islink(path) {
+        return false
+      }
+      return true
+    } catch {
+      return false
+    }
   }
 }
 
@@ -147,13 +156,37 @@ extension BasePath {
 
   public class func getsize(_ filename: String) -> Int {
     do {
-      let attrs = try Path.fileManager.attributesOfItem(atPath: filename)
-      if let _ = attrs[.type] {
-        // return (attr as! FileAttributeType) == FileAttributeType.typeSymbolicLink
-      }
-      return 1
+      let stat = try OS.stat(filename)
+      return stat.st_size
     } catch {
-      return 0
+      return -1
+    }
+  }
+
+  public class func getmtime(_ filename: String) -> Double {
+    do {
+      let stat = try OS.stat(filename)
+      return stat.st_mtime
+    } catch {
+      return -1
+    }
+  }
+
+  public class func getctime(_ filename: String) -> Double {
+    do {
+      let stat = try OS.stat(filename)
+      return stat.st_ctime
+    } catch {
+      return -1
+    }
+  }
+
+  public class func getatime(_ filename: String) -> Double {
+    do {
+      let stat = try OS.stat(filename)
+      return stat.st_atime
+    } catch {
+      return -1
     }
   }
 
@@ -171,5 +204,160 @@ extension BasePath {
 
   public class func isDeletable(_ filename: String) -> Bool {
     return Path.fileManager.isDeletableFile(atPath: filename)
+  }
+}
+
+extension BasePath {
+  public class func commonfix(_ paths: [String]) -> String {
+    if (paths.count == 0) {
+      return ""
+    }
+
+    let minP = paths.min()!
+    let maxP = paths.max()!
+
+    var idxMin = minP.startIndex
+    var idxMax = maxP.startIndex
+    while idxMin != minP.endIndex {
+      if minP[idxMin] != maxP[idxMax] {
+        return String(minP[..<idxMin])
+      }
+      idxMin = minP.index(after: idxMin)
+      idxMax = maxP.index(after: idxMax)
+    }
+    return minP
+  }
+
+  class func samestat(_ stat1: StatResult, _ stat2: StatResult) -> Bool {
+    return stat1.st_ino == stat2.st_ino && stat1.st_dev == stat2.st_dev
+  }
+
+  public class func samefile(_ file1: String, _ file2: String) -> Bool {
+    do {
+      let stat1 = try OS.stat(file1)
+      let stat2 = try OS.stat(file2)
+      return samestat(stat1, stat2)
+    } catch {
+      return false
+    }
+  }
+
+}
+
+extension BasePath {
+  public class func expanduser(_ path: String) -> String {
+    if !path.hasPrefix(tilde) {
+      return path
+    }
+
+    let idx = path.firstIndex(where: { $0 == sep.first }) ?? path.endIndex
+    let idxAfterTilde = path.index(after: path.startIndex)
+    var userhome: String
+    // ~
+    if idx == idxAfterTilde {
+      userhome = Path.fileManager.homeDirectoryForCurrentUser.path
+    } else {
+      // ~user
+      let user = String(path[idxAfterTilde..<idx])
+      if let p = Path.fileManager.homeDirectory(forUser: user) {
+        userhome = p.path
+      } else {
+        return path
+      }
+    }
+    while true {
+      if let c = userhome.last {
+        if c == sep.first {
+          userhome.removeLast()
+        } else {
+          break
+        }
+      }
+    }
+
+    userhome += path[idx...]
+    if userhome == "" {
+      return "/"
+    }
+    return userhome
+  }
+}
+
+extension BasePath {
+  public class func normpath(_ path: String) -> String {
+    if path == "" {
+      return curdir
+    }
+    return path
+  }
+
+  public class func abspath(_ path: String) -> String {
+    var p = path
+    if !isabs(path) {
+      let cwd = OS.getcwd()
+      p = join(cwd, path)
+    }
+    return normpath(p)
+  }
+
+  public class func realpath(_ filename: String) {
+    var seen: Dictionary<String, String> = [:]
+    let (path, ok) = _joinrealpath("", filename, &seen)
+    print(path, ok)
+  }
+
+  class func _joinrealpath(_ path: String, _ rest: String, _ seen: inout Dictionary<String, String>) -> (String, Bool) {
+    var p = path
+    var r = rest
+    if isabs(rest) {
+      r = String(r[p.index(after: p.startIndex)...])
+      p = sep
+    }
+
+    while !r.isEmpty {
+      let idx = r.firstIndex(where: { $0 == sep.first }) ?? r.endIndex
+      var name = String(r[..<idx])
+      if idx == r.endIndex {
+        r = ""
+      } else {
+        r = String(r[r.index(after: idx)...])
+      }
+
+      if name == "" || name == curdir {
+        continue
+      }
+
+      if name == pardir {
+        if p.isEmpty {
+          (p, name) = split(p)
+          if name == pardir {
+            p = join(p, pardir, pardir)
+          }
+        } else {
+          p = pardir
+        }
+      }
+
+      let newPath = join(p, name)
+      if !islink(newPath) {
+        p = newPath
+        continue
+      }
+
+      if let v = seen[newPath] {
+        p = v
+        return (join(newPath, r), false)
+      }
+
+      seen.removeValue(forKey: newPath)
+      var ok: Bool
+      (p, ok) = _joinrealpath(p, OS.readlink(newPath), &seen)
+      if !ok {
+        return (join(p, rest), false)
+      }
+
+      seen[newPath] = p
+    }
+    return (p, true)
   }
 }

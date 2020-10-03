@@ -18,8 +18,8 @@ public class OS {
     try Path.fileManager.linkItem(at: at, to: dst)
   }
 
-  public static func readlink(_ link: String) throws -> String {
-    return try Path.fileManager.destinationOfSymbolicLink(atPath: link)
+  public static func readlink(_ link: String) -> String {
+    return (try? Path.fileManager.destinationOfSymbolicLink(atPath: link)) ?? ""
   }
 
   public static func remove(_ file: String) throws {
@@ -74,7 +74,8 @@ extension OS {
     do {
       let attrs = try Path.fileManager.attributesOfItem(atPath: path)
       let stat = StatResult()
-      stat.st_mode = (attrs[.posixPermissions] as? NSNumber)?.intValue ?? -1
+      stat.st_mode = attrs[.posixPermissions] as? Int ?? -1
+      stat.st_ino = attrs[.systemFileNumber] as? Int ?? -1
       stat.st_dev = attrs[.deviceIdentifier] as? Int ?? -1
       stat.st_nlink = attrs[.referenceCount] as? Int ?? -1
       stat.st_uid = attrs[.ownerAccountID] as? Int ?? -1
@@ -88,5 +89,11 @@ extension OS {
     } catch {
       return StatResult()
     }
+  }
+}
+
+extension OS {
+  public static func getcwd() -> String {
+    return Path.fileManager.currentDirectoryPath
   }
 }

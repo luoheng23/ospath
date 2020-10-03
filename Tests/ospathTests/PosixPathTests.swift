@@ -102,6 +102,13 @@ final class PosixPathTests: XCTestCase {
         XCTAssertTrue(PosixPath.isdir("Sources"))
     }
 
+    func testGetsize() {
+        // if LICENSE changed, this test will fail
+        let filename = "LICENSE"
+        let size = 1064
+        XCTAssertEqual(PosixPath.getsize(filename), size)
+    }
+
 
     static var allTests = [
         ("testIsabs", testIsabs),
@@ -113,5 +120,6 @@ final class PosixPathTests: XCTestCase {
         ("testIslink", testIslink),
         ("testIsfile", testIsfile),
         ("testIsdir", testIsdir),
+        ("testGetsize", testGetsize),
     ]
 }
