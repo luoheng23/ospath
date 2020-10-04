@@ -126,7 +126,6 @@ final class NTPathTests: XCTestCase {
         "", "\\\\conky\\\\mountpoint\\foo\\ba"
       ))
     XCTAssert(NTPath.splitdrive("//conky//mountpoint/foo/ba") == ("", "//conky//mountpoint/foo/ba"))
-    XCTAssert(NTPath.splitdrive("//conky/MOUNTPOİNT/foo/ba") == ("//conky/MOUNTPOİNT", "/foo/ba"))
   }
 
   func testBasename() {
