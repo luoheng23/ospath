@@ -1,6 +1,5 @@
-
 #if os(Windows)
-public typealias OSPath = PosixPath
+  public typealias OSPath = PosixPath
 #else
-public typealias OSPath = NTPath
+  public typealias OSPath = NTPath
 #endif
