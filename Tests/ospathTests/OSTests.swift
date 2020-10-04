@@ -5,16 +5,17 @@ import XCTest
 // TODO
 final class OSTests: XCTestCase {
 
-  func testStat() {
-    let path = "README.md"
-    do {
-      let _ = try OS.stat(path)
-    } catch {
-      XCTAssertTrue(false)
+    func testStat() {
+        let path = "README.md"
+        do {
+            let _ = try OS.stat(path)
+        }
+        catch {
+            XCTAssertTrue(false)
+        }
     }
-  }
 
-  static var allTests = [
-    ("testStat", testStat)
-  ]
+    static var allTests = [
+        ("testStat", testStat)
+    ]
 }
