@@ -112,47 +112,6 @@ public class NTPath: BasePath {
       return ("", path)
   }
 
-  override public class func islink(_ path: String) -> Bool {
-    do {
-      let attrs = try Path.fileManager.attributesOfItem(atPath: path)
-      if let attr = attrs[.type] {
-        return (attr as! FileAttributeType) == .typeSymbolicLink
-      }
-      return false
-    } catch {
-      return false
-    }
-  }
-
-  override public class func lexists(_ path: String) -> Bool {
-    do {
-      let _ = try Path.fileManager.destinationOfSymbolicLink(atPath: path)
-      return true
-    } catch {
-      return false
-    }
-  }
-
-  override public class func exists(_ path: String) -> Bool {
-    return Path.fileManager.fileExists(atPath: path)
-  }
-
-  override public class func isfile(_ path: String) -> Bool {
-    var isDir: ObjCBool = false
-    if Path.fileManager.fileExists(atPath: path, isDirectory: &isDir) {
-      return !isDir.boolValue
-    }
-    return false
-  }
-
-  override public class func isdir(_ path: String) -> Bool {
-    var isDir: ObjCBool = false
-    if Path.fileManager.fileExists(atPath: path, isDirectory: &isDir) {
-      return isDir.boolValue
-    }
-    return false
-  }
-
   override public class func normpath(_ path: String) -> String {
     guard !path.isEmpty else { return curdir }
     let specialPrefixes = ["\\\\.\\", "\\\\?\\"]
@@ -201,39 +160,6 @@ public class NTPath: BasePath {
     return d + comps.joined(separator: sep)
   }
 
-  override public class func abspath(_ path: String) -> String {
-    var p = path
-    if !isabs(path) {
-      let cwd = OS.getcwd()
-      p = join(cwd, path)
-    }
-    return normpath(p)
-  }
-
-  // override public class func realpath(_ filename: String) -> String {
-  //   var seen: [String: String] = [:]
-  //   let (path, _) = _joinrealpath("", filename, &seen)
-  //   return abspath(path)
-  // }
-
-  override public class func commonprefix(_ paths: [String]) -> String {
-    guard !paths.isEmpty else { return "" }
-
-    let minP = paths.min()!
-    let maxP = paths.max()!
-
-    var idxMin = minP.startIndex
-    var idxMax = maxP.startIndex
-    while idxMin != minP.endIndex {
-      if minP[idxMin] != maxP[idxMax] {
-        return String(minP[..<idxMin])
-      }
-      idxMin = minP.index(after: idxMin)
-      idxMax = maxP.index(after: idxMax)
-    }
-    return minP
-  }
-
   override public class func commonpath(_ paths: [String]) -> String {
     guard !paths.isEmpty else { return "" }
     guard paths.count != 1 else { return paths[0] }
@@ -271,63 +197,6 @@ public class NTPath: BasePath {
     return pre + common.joined(separator: sep)
   }
 
-  override class func _joinrealpath(_ path: String, _ rest: String, _ seen: inout [String: String]) -> (
-    String, Bool
-  ) {
-    var newPath = path
-    var r = rest
-    if isabs(rest) {
-      r = String(r[r.index(after: r.startIndex)...])
-      newPath = sep
-    }
-
-    while !r.isEmpty {
-      let idx = r.firstIndex(where: { $0 == sep.first }) ?? r.endIndex
-      var name = String(r[..<idx])
-      if idx == r.endIndex {
-        r = ""
-      } else {
-        r = String(r[r.index(after: idx)...])
-      }
-
-      if name == "" || name == curdir {
-        continue
-      }
-
-      if name == pardir {
-        if !newPath.isEmpty {
-          (newPath, name) = split(newPath)
-          if name == pardir {
-            newPath = join(newPath, pardir, pardir)
-          }
-        } else {
-          newPath = pardir
-        }
-        continue
-      }
-
-      let p = join(newPath, name)
-      if !islink(p) {
-        newPath = p
-        continue
-      }
-
-      if let v = seen[p] {
-        newPath = v
-        return (join(newPath, r), false)
-      }
-
-      seen.removeValue(forKey: p)
-      var ok: Bool
-      (newPath, ok) = _joinrealpath(newPath, OS.readlink(p), &seen)
-      if !ok {
-        return (join(newPath, rest), false)
-      }
-
-      seen[p] = newPath
-    }
-    return (newPath, true)
-  }
 
   override class func bigThan(_ s1: [String.SubSequence], _ s2: [String.SubSequence]) -> Bool {
     let length = min(s1.count, s2.count)
