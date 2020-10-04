@@ -2,15 +2,15 @@ import XCTest
 
 @testable import ospath
 
+// TODO
 final class OSTests: XCTestCase {
 
   func testStat() {
     let path = "README.md"
     do {
       let _ = try OS.stat(path)
-      // print(attr)
     } catch {
-
+      XCTAssertTrue(false)
     }
   }
 
