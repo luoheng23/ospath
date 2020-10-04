@@ -1,1 +1,1 @@
-swift format -ri .
+swift format -ri --configuration .swift-format .
