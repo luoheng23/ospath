@@ -278,10 +278,33 @@ extension BasePath {
 
 extension BasePath {
   public class func normpath(_ path: String) -> String {
-    if path == "" {
-      return curdir
+    guard !path.isEmpty else { return curdir }
+
+    var slashes = 0
+    if path.hasPrefix(sep) {
+      slashes += 1
     }
-    return path
+    if slashes == 1 && path.hasPrefix(sep + sep) && !path.hasPrefix(sep + sep + sep) {
+      slashes += 1
+    }
+    var comps = path.split(separator: sep.first!)
+    var newComps = [Substring]()
+    for comp in comps {
+      if comp == "" || comp == curdir {
+        continue
+      }
+      if (comp != pardir || slashes == 0 && newComps.isEmpty) || (
+        !newComps.isEmpty && newComps.last! == pardir) {
+          newComps.append(comp)
+      } else if !newComps.isEmpty {
+        newComps.removeLast()
+      }
+    }
+    comps = newComps
+    var newPath = comps.joined(separator: sep)
+    newPath = String(repeating: sep, count: slashes) + newPath
+    guard !newPath.isEmpty else { return curdir }
+    return newPath
   }
 
   public class func abspath(_ path: String) -> String {
