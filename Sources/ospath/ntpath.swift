@@ -27,10 +27,10 @@ public class NTPath: BasePath {
 
   // check if path is absolute
   override public class func isabs(_ path: String) -> Bool {
-      var p = normcase(path)
-      guard !p.hasPrefix("\\\\?\\") else { return true }
-      p = splitdrive(p).tail
-      return p.count > 0 && ["\\", "/"].contains(p.first)
+    var p = normcase(path)
+    guard !p.hasPrefix("\\\\?\\") else { return true }
+    p = splitdrive(p).tail
+    return p.count > 0 && ["\\", "/"].contains(p.first)
   }
 
   // join pathnames
@@ -57,9 +57,8 @@ public class NTPath: BasePath {
       }
       path += pPath
     }
-    if !path.isEmpty && !["\\", "/"].contains(path.first) &&
-      !d.isEmpty && d.last != ":" {
-        return d + sep + path
+    if !path.isEmpty && !["\\", "/"].contains(path.first) && !d.isEmpty && d.last != ":" {
+      return d + sep + path
     }
     return d + path
   }
@@ -88,34 +87,38 @@ public class NTPath: BasePath {
   }
 
   override public class func splitdrive(_ path: String) -> (head: String, tail: String) {
-      guard path.count >= 2 else { return ("", path) }
-      let normp = normcase(path)
-      if normp.hasPrefix(sep + sep) && !normp.hasPrefix(sep + sep + sep) {
-          if let index = normp[normp.index(normp.startIndex, offsetBy: 2)...].firstIndex(where: { $0 == sep.first }) {
-              if let index2 = normp[normp.index(after: index)...].firstIndex(where: { $0 == sep.first }) {
-                  if index2 == normp.index(after: index) {
-                      return ("", path)
-                  }
-                  return (String(path[..<index2]), String(path[index2...]))
-              } else {
-                  return (path, "")
-              }
-          } else {
-              return ("", path)
+    guard path.count >= 2 else { return ("", path) }
+    let normp = normcase(path)
+    if normp.hasPrefix(sep + sep) && !normp.hasPrefix(sep + sep + sep) {
+      if let index = normp[normp.index(normp.startIndex, offsetBy: 2)...].firstIndex(where: {
+        $0 == sep.first
+      }) {
+        if let index2 = normp[normp.index(after: index)...].firstIndex(where: { $0 == sep.first }) {
+          if index2 == normp.index(after: index) {
+            return ("", path)
           }
+          return (String(path[..<index2]), String(path[index2...]))
+        } else {
+          return (path, "")
+        }
+      } else {
+        return ("", path)
       }
+    }
 
-      if normp[normp.index(after: normp.startIndex)] == ":" {
-          let index = normp.index(normp.startIndex, offsetBy: 2)
-          return (String(path[..<index]), String(path[index...]))
-      }
-      return ("", path)
+    if normp[normp.index(after: normp.startIndex)] == ":" {
+      let index = normp.index(normp.startIndex, offsetBy: 2)
+      return (String(path[..<index]), String(path[index...]))
+    }
+    return ("", path)
   }
 
   override public class func normpath(_ path: String) -> String {
     guard !path.isEmpty else { return curdir }
     let specialPrefixes = ["\\\\.\\", "\\\\?\\"]
-    guard !path.hasPrefix(specialPrefixes[0]) && !path.hasPrefix(specialPrefixes[1]) else { return path }
+    guard !path.hasPrefix(specialPrefixes[0]) && !path.hasPrefix(specialPrefixes[1]) else {
+      return path
+    }
 
     var p = normcase(path)
     var d: String
@@ -142,8 +145,8 @@ public class NTPath: BasePath {
       if comps[i] == "" || comps[i] == curdir {
         comps.remove(at: i)
       } else if comps[i] == pardir {
-        if i > 0 && comps[i-1] != pardir {
-          comps.removeSubrange((i-1)...i)
+        if i > 0 && comps[i - 1] != pardir {
+          comps.removeSubrange((i - 1)...i)
           i -= 1
         } else if i == 0 && d.last == sep.first! {
           comps.remove(at: i)
@@ -167,7 +170,10 @@ public class NTPath: BasePath {
     let driveSplit = paths.map { splitdrive(normpath($0).lowercased) }
     var splitPaths = driveSplit.map { $0.1.split(separator: sep.first!) }
 
-    guard driveSplit.allSatisfy({ $0.1.hasPrefix(sep) }) || driveSplit.allSatisfy( { !$0.1.hasPrefix(sep) }) else { return "" }
+    guard
+      driveSplit.allSatisfy({ $0.1.hasPrefix(sep) })
+        || driveSplit.allSatisfy({ !$0.1.hasPrefix(sep) })
+    else { return "" }
     let sameDrive = driveSplit[0].0
     for d in driveSplit {
       if d.0 != sameDrive {
@@ -196,19 +202,4 @@ public class NTPath: BasePath {
     }
     return pre + common.joined(separator: sep)
   }
-
-
-  override class func bigThan(_ s1: [String.SubSequence], _ s2: [String.SubSequence]) -> Bool {
-    let length = min(s1.count, s2.count)
-    for i in 0..<length {
-      if s1[i] > s2[i] {
-        return true
-      }
-      if s1[i] < s2[i] {
-        return false
-      }
-    }
-    return false
-  }
-
 }

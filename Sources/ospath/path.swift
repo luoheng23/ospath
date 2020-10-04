@@ -76,22 +76,102 @@ public class BasePath {
     return (String(head), String(tail))
   }
 
-  public class func splitext(_ path: String) -> (head: String, tail: String) {
-    return Path.splitext(path: path, sep: sep, altsep: altsep, extsep: extsep)
-  }
-
   public class func splitdrive(_ path: String) -> (head: String, tail: String) {
     return ("", path)
   }
 
+  public class func normpath(_ path: String) -> String {
+    guard !path.isEmpty else { return curdir }
+
+    var slashes = 0
+    if path.hasPrefix(sep) {
+      slashes += 1
+    }
+    if slashes == 1 && path.hasPrefix(sep + sep) && !path.hasPrefix(sep + sep + sep) {
+      slashes += 1
+    }
+    var comps = path.split(separator: sep.first!)
+    var newComps = [Substring]()
+    for comp in comps {
+      if comp == "" || comp == curdir {
+        continue
+      }
+      if (comp != pardir || slashes == 0 && newComps.isEmpty)
+        || (!newComps.isEmpty && newComps.last! == pardir)
+      {
+        newComps.append(comp)
+      } else if !newComps.isEmpty {
+        newComps.removeLast()
+      }
+    }
+    comps = newComps
+    var newPath = comps.joined(separator: sep)
+    newPath = String(repeating: sep, count: slashes) + newPath
+    guard !newPath.isEmpty else { return curdir }
+    return newPath
+  }
+
+  public class func commonpath(_ paths: [String]) -> String {
+    guard
+      !paths.isEmpty
+        && (paths.allSatisfy({ $0.hasPrefix(sep) }) || paths.allSatisfy({ !$0.hasPrefix(sep) }))
+    else { return "" }
+    var splitPaths = paths.map { $0.split(separator: sep.first!) }
+    splitPaths = splitPaths.map { $0.filter { $0 != "" && $0 != curdir } }
+    var s1 = splitPaths[0]
+    var s2 = splitPaths[0]
+    for c in splitPaths {
+      if bigThan(c, s2) {
+        s2 = c
+      } else if bigThan(s1, c) {
+        s1 = c
+      }
+    }
+    let pre = paths[0].hasPrefix(sep) ? sep : ""
+    for i in 0..<s1.count {
+      if s1[i] != s2[i] {
+        let common = s1[..<i]
+        return pre + common.joined(separator: sep)
+      }
+    }
+    let common = s1
+    return pre + common.joined(separator: sep)
+  }
+
+}
+
+extension BasePath {
+  public class func splitext(_ path: String) -> (head: String, tail: String) {
+    return Path.splitext(path: path, sep: sep, altsep: altsep, extsep: extsep)
+  }
+
+  public class func commonprefix(_ paths: [String]) -> String {
+    guard !paths.isEmpty else { return "" }
+
+    let minP = paths.min()!
+    let maxP = paths.max()!
+
+    var idxMin = minP.startIndex
+    var idxMax = maxP.startIndex
+    while idxMin != minP.endIndex {
+      if minP[idxMin] != maxP[idxMax] {
+        return String(minP[..<idxMin])
+      }
+      idxMin = minP.index(after: idxMin)
+      idxMax = maxP.index(after: idxMax)
+    }
+    return minP
+  }
+}
+
+extension BasePath {
+
   public class func basename(_ path: String) -> String {
-    let (_, name) = split(path)
-    return name
+    return split(path).tail
   }
 
   public class func dirname(_ path: String) -> String {
-    let (name, _) = split(path)
-    return name
+    return split(path).head
   }
 
   public class func islink(_ path: String) -> Bool {
@@ -162,7 +242,6 @@ public class BasePath {
     return false
   }
 
-  
   public class func getsize(_ filename: String) -> Int {
     do {
       let stat = try OS.stat(filename)
@@ -257,35 +336,20 @@ public class BasePath {
     }
     return userhome
   }
-  public class func normpath(_ path: String) -> String {
-    guard !path.isEmpty else { return curdir }
+}
 
-    var slashes = 0
-    if path.hasPrefix(sep) {
-      slashes += 1
-    }
-    if slashes == 1 && path.hasPrefix(sep + sep) && !path.hasPrefix(sep + sep + sep) {
-      slashes += 1
-    }
-    var comps = path.split(separator: sep.first!)
-    var newComps = [Substring]()
-    for comp in comps {
-      if comp == "" || comp == curdir {
-        continue
+extension BasePath {
+  static func bigThan(_ s1: [String.SubSequence], _ s2: [String.SubSequence]) -> Bool {
+    let length = min(s1.count, s2.count)
+    for i in 0..<length {
+      if s1[i] > s2[i] {
+        return true
       }
-      if (comp != pardir || slashes == 0 && newComps.isEmpty)
-        || (!newComps.isEmpty && newComps.last! == pardir)
-      {
-        newComps.append(comp)
-      } else if !newComps.isEmpty {
-        newComps.removeLast()
+      if s1[i] < s2[i] {
+        return false
       }
     }
-    comps = newComps
-    var newPath = comps.joined(separator: sep)
-    newPath = String(repeating: sep, count: slashes) + newPath
-    guard !newPath.isEmpty else { return curdir }
-    return newPath
+    return false
   }
 
   public class func abspath(_ path: String) -> String {
@@ -303,52 +367,7 @@ public class BasePath {
     return abspath(path)
   }
 
-  public class func commonprefix(_ paths: [String]) -> String {
-    guard !paths.isEmpty else { return "" }
-
-    let minP = paths.min()!
-    let maxP = paths.max()!
-
-    var idxMin = minP.startIndex
-    var idxMax = maxP.startIndex
-    while idxMin != minP.endIndex {
-      if minP[idxMin] != maxP[idxMax] {
-        return String(minP[..<idxMin])
-      }
-      idxMin = minP.index(after: idxMin)
-      idxMax = maxP.index(after: idxMax)
-    }
-    return minP
-  }
-
-  public class func commonpath(_ paths: [String]) -> String {
-    guard
-      !paths.isEmpty
-        && (paths.allSatisfy({ $0.hasPrefix(sep) }) || paths.allSatisfy({ !$0.hasPrefix(sep) }))
-    else { return "" }
-    var splitPaths = paths.map { $0.split(separator: sep.first!) }
-    splitPaths = splitPaths.map { $0.filter { $0 != "" && $0 != curdir } }
-    var s1 = splitPaths[0]
-    var s2 = splitPaths[0]
-    for c in splitPaths {
-      if bigThan(c, s2) {
-        s2 = c
-      } else if bigThan(s1, c) {
-        s1 = c
-      }
-    }
-    let pre = paths[0].hasPrefix(sep) ? sep : ""
-    for i in 0..<s1.count {
-      if s1[i] != s2[i] {
-        let common = s1[..<i]
-        return pre + common.joined(separator: sep)
-      }
-    }
-    let common = s1
-    return pre + common.joined(separator: sep)
-  }
-
-  class func _joinrealpath(_ path: String, _ rest: String, _ seen: inout [String: String]) -> (
+  static func _joinrealpath(_ path: String, _ rest: String, _ seen: inout [String: String]) -> (
     String, Bool
   ) {
     var newPath = path
@@ -405,31 +424,4 @@ public class BasePath {
     }
     return (newPath, true)
   }
-
-  class func bigThan(_ s1: [String.SubSequence], _ s2: [String.SubSequence]) -> Bool {
-    let length = min(s1.count, s2.count)
-    for i in 0..<length {
-      if s1[i] > s2[i] {
-        return true
-      }
-      if s1[i] < s2[i] {
-        return false
-      }
-    }
-    return false
-  }
-
-}
-
-
-extension BasePath {
-
-}
-
-extension BasePath {
-
-}
-
-extension BasePath {
-
 }
