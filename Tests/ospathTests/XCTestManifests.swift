@@ -6,6 +6,7 @@ import XCTest
             testCase(PosixPathTests.allTests),
             testCase(NTPathTests.allTests),
             testCase(OSTests.allTests),
+            testCase(OSPathTests.allTests),
         ]
     }
 #endif
