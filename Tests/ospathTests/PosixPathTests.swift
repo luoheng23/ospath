@@ -116,6 +116,17 @@ final class PosixPathTests: XCTestCase {
     }
 
 
+    func testNormpath() {
+        XCTAssertEqual(PosixPath.normpath(""), ".")
+        XCTAssertEqual(PosixPath.normpath("/"), "/")
+        XCTAssertEqual(PosixPath.normpath("//"), "//")
+        XCTAssertEqual(PosixPath.normpath("///"), "/")
+        XCTAssertEqual(PosixPath.normpath("///foo/.//bar//"), "/foo/bar")
+        XCTAssertEqual(PosixPath.normpath("///foo/.//bar//.//..//.//baz"),
+                         "/foo/baz")
+        XCTAssertEqual(PosixPath.normpath("///..//./foo/.//bar"), "/foo/bar")
+    }
+
     static var allTests = [
         ("testIsabs", testIsabs),
         ("testJoin", testJoin),
@@ -128,5 +139,6 @@ final class PosixPathTests: XCTestCase {
         ("testIsdir", testIsdir),
         ("testGetsize", testGetsize),
         ("testExpanduser", testExpanduser),
+        ("testNormpath", testNormpath),
     ]
 }
