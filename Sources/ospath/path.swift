@@ -14,7 +14,7 @@ public class BasePath {
     return ":"
   }
 
-  class var funcpath: String {
+  class var defpath: String {
     return "/bin:/usr/bin"
   }
 
