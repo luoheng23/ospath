@@ -64,7 +64,9 @@ extension String.SubSequence {
     mutating func rstrip(_ _set: Set<Character> = []) {
         guard !_set.isEmpty else { return }
         var idx = self.endIndex
-        while idx != self.startIndex && _set.contains(self[self.index(before: idx)]) {
+        while idx != self.startIndex
+            && _set.contains(self[self.index(before: idx)])
+        {
             idx = self.index(before: idx)
         }
         self = self[..<idx]
@@ -90,7 +92,9 @@ extension String {
     mutating func rstrip(_ _set: Set<Character> = []) {
         guard !_set.isEmpty else { return }
         var idx = self.endIndex
-        while idx != self.startIndex && _set.contains(self[self.index(before: idx)]) {
+        while idx != self.startIndex
+            && _set.contains(self[self.index(before: idx)])
+        {
             idx = self.index(before: idx)
         }
         self = String(self[..<idx])

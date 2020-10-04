@@ -32,7 +32,9 @@ public class NTPath: BasePath {
     // check if path is absolute
     override public class func isabs(_ path: String) -> Bool {
         guard !normcase(path).hasPrefix(specialPrefixes[0]) else { return true }
-        guard let c = splitdrive(path).tail.first, seps.contains(c) else { return false }
+        guard let c = splitdrive(path).tail.first, seps.contains(c) else {
+            return false
+        }
         return true
     }
 
@@ -65,7 +67,7 @@ public class NTPath: BasePath {
             }
             path += pPath
         }
-        if let c = path.first, let d = drive.last, !seps.contains(c) &&  d != ":"
+        if let c = path.first, let d = drive.last, !seps.contains(c) && d != ":"
         {
             return drive + sep + path
         }
@@ -79,8 +81,7 @@ public class NTPath: BasePath {
     ) {
         let (d, p) = splitdrive(path)
         var i = p.endIndex
-        while i != p.startIndex && !seps.contains(p[p.index(before: i)])
-        {
+        while i != p.startIndex && !seps.contains(p[p.index(before: i)]) {
             i = p.index(before: i)
         }
         var (head, tail) = (p[..<i], p[i...])
@@ -180,8 +181,8 @@ public class NTPath: BasePath {
 
         guard
             (driveSplit.allSatisfy({ $0.1.hasPrefix(sep) })
-                || driveSplit.allSatisfy({ !$0.1.hasPrefix(sep) })) &&
-            driveSplit.allSatisfy( { $0.0 == driveSplit[0].0 })
+                || driveSplit.allSatisfy({ !$0.1.hasPrefix(sep) }))
+                && driveSplit.allSatisfy({ $0.0 == driveSplit[0].0 })
         else { return "" }
 
         let (drive, path) = splitdrive(normcase(paths[0]))
