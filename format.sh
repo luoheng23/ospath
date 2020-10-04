@@ -1,1 +1,1 @@
-swift format -ri Sources
+swift format -ri .
