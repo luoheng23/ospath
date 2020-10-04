@@ -10,6 +10,7 @@ public class StatResult {
   public var st_mtime: Double = -1
   public var st_ctime: Double = -1
 }
+
 extension StatResult: CustomStringConvertible {
   public var description: String {
     var str = ""
