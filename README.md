@@ -3,15 +3,30 @@
 
 This package aims to provide same functions as os.path module in python.
 
+## Introduction
+There are 3 classes:
+* `PosixPath` is for linux-like path
+* `NTPath` is for windows-like path.
+* `OS` is to create file, folder, symlink, etc.
+
+There is an `OSPath`, it's a `typealias` to `PosixPath` on windows, or a `typealias` to `NTPath` on linux.
+
 ## Example
 ```swift
 // path operation
 PosixPath.isabs("/home")  // true
 PosixPath.join("/home", "hello", "good")  // "/home/hello/good"
+PosixPath.split("/home/hello")   // ("/home", "hello") 
 PosixPath.dirname("/home/hello")  // "/home"
 PosixPath.basename("/home/hello") // "hello"
-PosixPath.split("/home/hello")   // ("/home", "hello")
 PosixPath.splitext("foo.bar")   // ("foo", "bar")
+PosixPath.normpath("/foo/../baz")  // "/baz"
+PosixPath.realpath(".")   // current directory
+PosixPath.abspath("~")    // home directory for current user
+PosixPath.commonpath(["/usr/lib64", "/usr/lib"])  // "/usr"
+PosixPath.commonprefix(["/usr/lib64", "/usr/lib"])  // "/usr/lib"
+PosixPath.expanduser("~user") // home directory for user
+NTPath.splitdrive("C:\\Program Files") // ("C:", "\\Program Files")
 
 // file operation
 PosixPath.islink("filename")  // Return true if filename is a symbolic link
@@ -29,13 +44,27 @@ PosixPath.isReadable("filename") // Return true if filename is readable
 PosixPath.isWritable("filename") // Return true if filename is writable
 PosixPath.isExecutable("filename") // Return true if filename is executable
 PosixPath.isDeletable("filename") // Return true if filename is deletable
+
+// OS operation
+// These methods can accept String or URL
+OS.symlink(file, link) // create a symlink
+OS.link(file, link)   // create a hard link
+OS.readlink(link)   // return the path of that link
+OS.remove(file)    // remove file
+OS.copy(file, dst) // copy file to dst
+OS.move(file, dst) // move file to dst
+OS.open(file)      // create a file
+OS.mkdir(dir)   // create a directory
+OS.makedirs()   // create a directory recursively
+
+// others
+OS.stat(file)   // get file metadata
+OS.getcwd()     // get current directory
+OS.home(user)   // get home directory of user 
 ```
 
 ## Installation
 Put the following string in the dependencies of your `Package.swift`
 ```swift
-.package(url: "https://github.com/luoheng23/ospath", from: "1.1.0")
+.package(url: "https://github.com/luoheng23/ospath", from: "1.2.0")
 ```
-
-## TODO
-This work is not finished yet. More functions need to be implemented.
