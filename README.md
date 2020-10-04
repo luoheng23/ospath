@@ -5,11 +5,11 @@ This package aims to provide same functions as os.path module in python.
 
 ## Introduction
 There are 3 classes:
-* `PosixPath` is for linux-like path
-* `NTPath` is for windows-like path.
+* `PosixPath` is for UNIX-like path
+* `NTPath` is for Windows path.
 * `OS` is to create file, folder, symlink, etc.
 
-There is an `OSPath`, it's a `typealias` to `PosixPath` on windows, or a `typealias` to `NTPath` on linux.
+There is an `OSPath`, it's a `typealias` to `NTPath` on Windows, or a `typealias` to `PosixPath` on UNIX-like os.
 
 ## Example
 ```swift
