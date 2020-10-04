@@ -245,26 +245,18 @@ extension BasePath {
 }
 
 extension BasePath {
-  @available(macOS 10.12, *)
   public class func expanduser(_ path: String) -> String {
-    if !path.hasPrefix(tilde) {
-      return path
-    }
+    guard path.hasPrefix(tilde) else { return path }
 
-    let idx = path.firstIndex(where: { $0 == sep.first }) ?? path.endIndex
-    let idxAfterTilde = path.index(after: path.startIndex)
     var userhome: String
-    // ~
-    if idx == idxAfterTilde {
-      userhome = Path.fileManager.homeDirectoryForCurrentUser.path
+    let idxAfterTilde = path.index(after: path.startIndex)
+    let idx = path.firstIndex(where: { $0 == sep.first }) ?? path.endIndex
+    // ~ and ~user
+    let user = String(path[idxAfterTilde..<idx])
+    if let p = OS.home(user) {
+      userhome = p
     } else {
-      // ~user
-      let user = String(path[idxAfterTilde..<idx])
-      if let p = Path.fileManager.homeDirectory(forUser: user) {
-        userhome = p.path
-      } else {
-        return path
-      }
+      return path
     }
     while true {
       if let c = userhome.last {

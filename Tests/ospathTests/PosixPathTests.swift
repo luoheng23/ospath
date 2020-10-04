@@ -109,6 +109,12 @@ final class PosixPathTests: XCTestCase {
         XCTAssertEqual(PosixPath.getsize(filename), size)
     }
 
+    func testExpanduser() {
+        XCTAssertEqual(PosixPath.expanduser("foo"), "foo")
+        let env = ProcessInfo.processInfo.environment
+        XCTAssertEqual(PosixPath.expanduser("~"), env["HOME"] ?? "")
+    }
+
 
     static var allTests = [
         ("testIsabs", testIsabs),
@@ -121,5 +127,6 @@ final class PosixPathTests: XCTestCase {
         ("testIsfile", testIsfile),
         ("testIsdir", testIsdir),
         ("testGetsize", testGetsize),
+        ("testExpanduser", testExpanduser),
     ]
 }

@@ -96,4 +96,19 @@ extension OS {
   public static func getcwd() -> String {
     return Path.fileManager.currentDirectoryPath
   }
+
+  public static func home(_ user: String = "") -> String? {
+    if user != "" {
+      if #available(macOS 10.12, *) {
+        if let p = Path.fileManager.homeDirectory(forUser: user) {
+          return p.path
+        } else {
+          return nil
+        }
+      } else {
+        return NSHomeDirectoryForUser(user)
+      }
+    }
+    return ProcessInfo.processInfo.environment["HOME"]
+  }
 }
