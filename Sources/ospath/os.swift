@@ -67,7 +67,6 @@ public class OS {
   }
 }
 
-
 extension OS {
 
   public static func stat(_ path: String) throws -> StatResult {

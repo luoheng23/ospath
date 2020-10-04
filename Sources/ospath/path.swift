@@ -149,7 +149,7 @@ extension BasePath {
     } catch {
       return false
     }
-  
+
     let parent = realpath(join(path, pardir))
     do {
       s2 = try OS.stat(parent)
@@ -223,25 +223,6 @@ extension BasePath {
 }
 
 extension BasePath {
-  public class func commonfix(_ paths: [String]) -> String {
-    if (paths.count == 0) {
-      return ""
-    }
-
-    let minP = paths.min()!
-    let maxP = paths.max()!
-
-    var idxMin = minP.startIndex
-    var idxMax = maxP.startIndex
-    while idxMin != minP.endIndex {
-      if minP[idxMin] != maxP[idxMax] {
-        return String(minP[..<idxMin])
-      }
-      idxMin = minP.index(after: idxMin)
-      idxMax = maxP.index(after: idxMax)
-    }
-    return minP
-  }
 
   class func samestat(_ stat1: StatResult, _ stat2: StatResult) -> Bool {
     return stat1.st_ino == stat2.st_ino && stat1.st_dev == stat2.st_dev
@@ -308,9 +289,10 @@ extension BasePath {
       if comp == "" || comp == curdir {
         continue
       }
-      if (comp != pardir || slashes == 0 && newComps.isEmpty) || (
-        !newComps.isEmpty && newComps.last! == pardir) {
-          newComps.append(comp)
+      if (comp != pardir || slashes == 0 && newComps.isEmpty)
+        || (!newComps.isEmpty && newComps.last! == pardir)
+      {
+        newComps.append(comp)
       } else if !newComps.isEmpty {
         newComps.removeLast()
       }
@@ -332,12 +314,59 @@ extension BasePath {
   }
 
   public class func realpath(_ filename: String) -> String {
-    var seen: Dictionary<String, String> = [:]
+    var seen: [String: String] = [:]
     let (path, _) = _joinrealpath("", filename, &seen)
     return abspath(path)
   }
 
-  class func _joinrealpath(_ path: String, _ rest: String, _ seen: inout Dictionary<String, String>) -> (String, Bool) {
+  public class func commonprefix(_ paths: [String]) -> String {
+    guard !paths.isEmpty else { return "" }
+
+    let minP = paths.min()!
+    let maxP = paths.max()!
+
+    var idxMin = minP.startIndex
+    var idxMax = maxP.startIndex
+    while idxMin != minP.endIndex {
+      if minP[idxMin] != maxP[idxMax] {
+        return String(minP[..<idxMin])
+      }
+      idxMin = minP.index(after: idxMin)
+      idxMax = maxP.index(after: idxMax)
+    }
+    return minP
+  }
+
+  public class func commonpath(_ paths: [String]) -> String {
+    guard
+      !paths.isEmpty
+        && (paths.allSatisfy({ $0.hasPrefix(sep) }) || paths.allSatisfy({ !$0.hasPrefix(sep) }))
+    else { return "" }
+    var splitPaths = paths.map { $0.split(separator: sep.first!) }
+    splitPaths = splitPaths.map { $0.filter { $0 != "" && $0 != curdir } }
+    var s1 = splitPaths[0]
+    var s2 = splitPaths[0]
+    for c in splitPaths {
+      if bigThan(c, s2) {
+        s2 = c
+      } else if bigThan(s1, c) {
+        s1 = c
+      }
+    }
+    let pre = paths[0].hasPrefix(sep) ? sep : ""
+    for i in 0..<s1.count {
+      if s1[i] != s2[i] {
+        let common = s1[..<i]
+        return pre + common.joined(separator: sep)
+      }
+    }
+    let common = s1
+    return pre + common.joined(separator: sep)
+  }
+
+  class func _joinrealpath(_ path: String, _ rest: String, _ seen: inout [String: String]) -> (
+    String, Bool
+  ) {
     var newPath = path
     var r = rest
     if isabs(rest) {
@@ -392,4 +421,18 @@ extension BasePath {
     }
     return (newPath, true)
   }
+
+  class func bigThan(_ s1: [String.SubSequence], _ s2: [String.SubSequence]) -> Bool {
+    let length = min(s1.count, s2.count)
+    for i in 0..<length {
+      if s1[i] > s2[i] {
+        return true
+      }
+      if s1[i] < s2[i] {
+        return false
+      }
+    }
+    return false
+  }
+
 }
