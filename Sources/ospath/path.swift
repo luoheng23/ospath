@@ -25,9 +25,6 @@ public class BasePath {
   class var devnull: String {
     return "/dev/null"
   }
-}
-
-extension BasePath {
 
   public class func normcase(_ path: String) -> String {
     return path
@@ -164,11 +161,8 @@ extension BasePath {
     }
     return false
   }
-}
 
-// access to file
-extension BasePath {
-
+  
   public class func getsize(_ filename: String) -> Int {
     do {
       let stat = try OS.stat(filename)
@@ -220,9 +214,6 @@ extension BasePath {
   public class func isDeletable(_ filename: String) -> Bool {
     return Path.fileManager.isDeletableFile(atPath: filename)
   }
-}
-
-extension BasePath {
 
   class func samestat(_ stat1: StatResult, _ stat2: StatResult) -> Bool {
     return stat1.st_ino == stat2.st_ino && stat1.st_dev == stat2.st_dev
@@ -237,10 +228,6 @@ extension BasePath {
       return false
     }
   }
-
-}
-
-extension BasePath {
   public class func expanduser(_ path: String) -> String {
     guard path.hasPrefix(tilde) else { return path }
 
@@ -270,9 +257,6 @@ extension BasePath {
     }
     return userhome
   }
-}
-
-extension BasePath {
   public class func normpath(_ path: String) -> String {
     guard !path.isEmpty else { return curdir }
 
@@ -434,5 +418,18 @@ extension BasePath {
     }
     return false
   }
+
+}
+
+
+extension BasePath {
+
+}
+
+extension BasePath {
+
+}
+
+extension BasePath {
 
 }
