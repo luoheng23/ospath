@@ -84,11 +84,11 @@ final class PosixPathTests: XCTestCase {
         if OS.open(newfile) {
             _ = try? OS.symlink(newfile, link)
             XCTAssertEqual(PosixPath.islink(link), true)
-            let _ = try? OS.remove(newfile)
+            _ = try? OS.remove(newfile)
             XCTAssertEqual(PosixPath.islink(link), true)
             XCTAssertEqual(PosixPath.exists(link), false)
             XCTAssertEqual(PosixPath.lexists(link), true)
-            let _ = try? OS.remove(link)
+            _ = try? OS.remove(link)
         }
     }
 
@@ -127,6 +127,30 @@ final class PosixPathTests: XCTestCase {
         XCTAssertEqual(PosixPath.normpath("///..//./foo/.//bar"), "/foo/bar")
     }
 
+    func testRealpath() {
+        XCTAssertEqual(PosixPath.realpath("."), OS.getcwd())
+        XCTAssertEqual(PosixPath.realpath("./."), OS.getcwd())
+        XCTAssertEqual(PosixPath.realpath(".."), PosixPath.dirname(OS.getcwd()))
+        XCTAssertEqual(PosixPath.realpath("../.."), PosixPath.dirname(PosixPath.dirname(OS.getcwd())))
+        XCTAssertEqual(PosixPath.realpath([String](repeating: "..", count: 100).joined(separator: "/")), "/")
+        XCTAssertEqual(PosixPath.realpath([String](repeating: ".", count: 100).joined(separator: "/")), OS.getcwd())
+    }
+
+    func testRealpathBasic() {
+        let filename = "sdafsdfhdsufhisfu232u3fjds"
+        let newfile = filename + "1"
+        let link = filename + "2"
+        _ = try? OS.remove(newfile)
+        _ = try? OS.remove(link)
+
+        if OS.open(newfile) {
+            _ = try? OS.symlink(newfile, link)
+            XCTAssertEqual(PosixPath.realpath(link), PosixPath.abspath(newfile))
+            _ = try? OS.remove(newfile)
+            _ = try? OS.remove(link)
+        }
+    }
+
     static var allTests = [
         ("testIsabs", testIsabs),
         ("testJoin", testJoin),
@@ -140,5 +164,7 @@ final class PosixPathTests: XCTestCase {
         ("testGetsize", testGetsize),
         ("testExpanduser", testExpanduser),
         ("testNormpath", testNormpath),
+        ("testRealpath", testRealpath),
+        ("testRealpathBasic", testRealpathBasic),
     ]
 }

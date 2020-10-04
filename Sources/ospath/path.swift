@@ -316,18 +316,18 @@ extension BasePath {
     return normpath(p)
   }
 
-  public class func realpath(_ filename: String) {
+  public class func realpath(_ filename: String) -> String {
     var seen: Dictionary<String, String> = [:]
-    let (path, ok) = _joinrealpath("", filename, &seen)
-    print(path, ok)
+    let (path, _) = _joinrealpath("", filename, &seen)
+    return abspath(path)
   }
 
   class func _joinrealpath(_ path: String, _ rest: String, _ seen: inout Dictionary<String, String>) -> (String, Bool) {
-    var p = path
+    var newPath = path
     var r = rest
     if isabs(rest) {
-      r = String(r[p.index(after: p.startIndex)...])
-      p = sep
+      r = String(r[newPath.index(after: newPath.startIndex)...])
+      newPath = sep
     }
 
     while !r.isEmpty {
@@ -344,36 +344,37 @@ extension BasePath {
       }
 
       if name == pardir {
-        if p.isEmpty {
-          (p, name) = split(p)
+        if !newPath.isEmpty {
+          (newPath, name) = split(newPath)
           if name == pardir {
-            p = join(p, pardir, pardir)
+            newPath = join(newPath, pardir, pardir)
           }
         } else {
-          p = pardir
+          newPath = pardir
         }
-      }
-
-      let newPath = join(p, name)
-      if !islink(newPath) {
-        p = newPath
         continue
       }
 
-      if let v = seen[newPath] {
-        p = v
+      let p = join(newPath, name)
+      if !islink(p) {
+        newPath = p
+        continue
+      }
+
+      if let v = seen[p] {
+        newPath = v
         return (join(newPath, r), false)
       }
 
-      seen.removeValue(forKey: newPath)
+      seen.removeValue(forKey: p)
       var ok: Bool
-      (p, ok) = _joinrealpath(p, OS.readlink(newPath), &seen)
+      (newPath, ok) = _joinrealpath(newPath, OS.readlink(p), &seen)
       if !ok {
-        return (join(p, rest), false)
+        return (join(newPath, rest), false)
       }
 
-      seen[newPath] = p
+      seen[p] = newPath
     }
-    return (p, true)
+    return (newPath, true)
   }
 }
