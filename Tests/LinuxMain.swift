@@ -1,5 +1,4 @@
 import XCTest
-
 import ospathTests
 
 var tests = [XCTestCaseEntry]()
