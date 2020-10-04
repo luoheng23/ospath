@@ -45,7 +45,7 @@ public class NTPath: BasePath {
         path = pPath
         continue
       } else if !pDrive.isEmpty && pDrive != d {
-        if pDrive.lowercased != d.lowercased {
+        if pDrive.lowercased() != d.lowercased() {
           d = pDrive
           path = pPath
           continue
@@ -167,7 +167,7 @@ public class NTPath: BasePath {
     guard !paths.isEmpty else { return "" }
     guard paths.count != 1 else { return paths[0] }
 
-    let driveSplit = paths.map { splitdrive(normpath($0).lowercased) }
+    let driveSplit = paths.map { splitdrive(normpath($0).lowercased()) }
     var splitPaths = driveSplit.map { $0.1.split(separator: sep.first!) }
 
     guard
