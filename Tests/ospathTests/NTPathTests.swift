@@ -8,7 +8,7 @@ final class NTPathTests: XCTestCase {
         XCTAssertEqual(NTPath.isabs("c:\\"), true)
         XCTAssertEqual(NTPath.isabs("\\\\conky\\mountpoint\\"), true)
         XCTAssertEqual(NTPath.isabs("\\foo"), true)
-        XCTAssertEqual(NTPath.isabs("\\foo\\ba"), true)
+        XCTAssertEqual(NTPath.isabs("\\foo\\bar"), true)
     }
 
     func testJoin() {

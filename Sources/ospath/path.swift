@@ -26,6 +26,7 @@ public class BasePath {
         return "/dev/null"
     }
 
+    // nothing to do with posixpath
     public class func normcase(_ path: String) -> String {
         return path
     }
@@ -67,20 +68,14 @@ public class BasePath {
         }
 
         var (head, tail) = (path[..<lastIndex], path[lastIndex...])
-
         if !head.allSatisfy({ $0 == sep.first }) {
-            var i = head.endIndex
-            while i != head.startIndex {
-                i = head.index(i, offsetBy: -1)
-                if head[i] != sep.first {
-                    break
-                }
-            }
-            head = head[...i]
+            // remove tailed '/'
+            head.rstrip([sep.first!])
         }
         return (String(head), String(tail))
     }
 
+    // nothing to do with posixpath
     public class func splitdrive(_ path: String) -> (head: String, tail: String)
     {
         return ("", path)
@@ -253,13 +248,7 @@ extension BasePath {
         catch {
             return false
         }
-        if s1.st_dev != s2.st_dev {
-            return true
-        }
-        if s1.st_ino == s2.st_ino {
-            return true
-        }
-        return false
+        return samestat(s1, s2)
     }
 
     public class func getsize(_ filename: String) -> Int {
@@ -332,36 +321,20 @@ extension BasePath {
             return false
         }
     }
+
     public class func expanduser(_ path: String) -> String {
         guard path.hasPrefix(tilde) else { return path }
 
-        var userhome: String
         let idxAfterTilde = path.index(after: path.startIndex)
         let idx = path.firstIndex(where: { $0 == sep.first }) ?? path.endIndex
         // ~ and ~user
         let user = String(path[idxAfterTilde..<idx])
-        if let p = OS.home(user) {
-            userhome = p
-        }
-        else {
-            return path
-        }
-        while true {
-            if let c = userhome.last {
-                if c == sep.first {
-                    userhome.removeLast()
-                }
-                else {
-                    break
-                }
-            }
-        }
 
+        guard var userhome = OS.home(user) else { return path }
+        // remove tailed '/'
+        userhome.rstrip([sep.first!])
         userhome += path[idx...]
-        if userhome == "" {
-            return "/"
-        }
-        return userhome
+        return userhome == "" ? "/" : userhome
     }
 }
 

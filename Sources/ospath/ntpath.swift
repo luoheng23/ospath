@@ -1,23 +1,27 @@
 import Foundation
 
 public class NTPath: BasePath {
-    override class var sep: String {
+
+    public static var seps: Set<Character> = ["\\", "/"]
+    public static var specialPrefixes = ["\\\\?\\", "\\\\.\\"]
+
+    override public class var sep: String {
         return "\\"  // nt path
     }
 
-    override class var pathsep: String {
+    override public class var pathsep: String {
         return ";"
     }
 
-    override class var defpath: String {
+    override public class var defpath: String {
         return ".;C:\\bin"
     }
 
-    override class var altsep: String? {
+    override public class var altsep: String? {
         return "/"
     }
 
-    override class var devnull: String {
+    override public class var devnull: String {
         return "nul"
     }
 
@@ -27,10 +31,9 @@ public class NTPath: BasePath {
 
     // check if path is absolute
     override public class func isabs(_ path: String) -> Bool {
-        var p = normcase(path)
-        guard !p.hasPrefix("\\\\?\\") else { return true }
-        p = splitdrive(p).tail
-        return p.count > 0 && ["\\", "/"].contains(p.first)
+        guard !normcase(path).hasPrefix(specialPrefixes[0]) else { return true }
+        guard let c = splitdrive(path).tail.first, seps.contains(c) else { return false }
+        return true
     }
 
     // join pathnames
@@ -38,35 +41,35 @@ public class NTPath: BasePath {
         _ basePath: String,
         _ toJoinedPaths: String...
     ) -> String {
-        var (d, path) = splitdrive(basePath)
+        var (drive, path) = splitdrive(basePath)
         for p in toJoinedPaths {
             let (pDrive, pPath) = splitdrive(p)
-            if !pPath.isEmpty && ["\\", "/"].contains(pPath.first) {
-                if !pDrive.isEmpty || d.isEmpty {
-                    d = pDrive
+            // absolute path
+            if let c = pPath.first, seps.contains(c) {
+                if drive.isEmpty || !pDrive.isEmpty {
+                    drive = pDrive
                 }
                 path = pPath
                 continue
             }
-            else if !pDrive.isEmpty && pDrive != d {
-                if pDrive.lowercased() != d.lowercased() {
-                    d = pDrive
+            else if !pDrive.isEmpty && pDrive != drive {
+                if pDrive.lowercased() != drive.lowercased() {
+                    drive = pDrive
                     path = pPath
                     continue
                 }
-                d = pDrive
+                drive = pDrive
             }
-            if !path.isEmpty && !["\\", "/"].contains(path.last) {
-                path = path + sep
+            if let c = path.last, !seps.contains(c) {
+                path += sep
             }
             path += pPath
         }
-        if !path.isEmpty && !["\\", "/"].contains(path.first) && !d.isEmpty
-            && d.last != ":"
+        if let c = path.first, let d = drive.last, !seps.contains(c) &&  d != ":"
         {
-            return d + sep + path
+            return drive + sep + path
         }
-        return d + path
+        return drive + path
     }
 
     // split a path in head (everything up to the last '/') and tail (the rest)
@@ -76,22 +79,14 @@ public class NTPath: BasePath {
     ) {
         let (d, p) = splitdrive(path)
         var i = p.endIndex
-        while i != p.startIndex && !["\\", "/"].contains(p[p.index(before: i)])
+        while i != p.startIndex && !seps.contains(p[p.index(before: i)])
         {
             i = p.index(before: i)
         }
         var (head, tail) = (p[..<i], p[i...])
-        if !head.allSatisfy({ ["\\", "/"].contains($0) }) {
-            while true {
-                if let c = head.last {
-                    if ["\\", "/"].contains(c) {
-                        head.removeLast()
-                    }
-                    else {
-                        break
-                    }
-                }
-            }
+
+        if !head.allSatisfy({ seps.contains($0) }) {
+            head.rstrip(seps)
         }
         return (String(d + head), String(tail))
     }
@@ -133,7 +128,6 @@ public class NTPath: BasePath {
 
     override public class func normpath(_ path: String) -> String {
         guard !path.isEmpty else { return curdir }
-        let specialPrefixes = ["\\\\.\\", "\\\\?\\"]
         guard
             !path.hasPrefix(specialPrefixes[0])
                 && !path.hasPrefix(specialPrefixes[1])
@@ -141,25 +135,11 @@ public class NTPath: BasePath {
             return path
         }
 
-        var p = normcase(path)
-        var d: String
-        (d, p) = splitdrive(p)
+        var (drive, p) = splitdrive(normcase(path))
 
         if p.hasPrefix(sep) {
-            d += sep
-            while true {
-                if let c = p.first {
-                    if c == sep.first {
-                        p.removeFirst()
-                    }
-                    else {
-                        break
-                    }
-                }
-                else {
-                    break
-                }
-            }
+            drive += sep
+            p.lstrip(seps)
         }
 
         var comps = p.split(separator: sep.first!)
@@ -173,7 +153,7 @@ public class NTPath: BasePath {
                     comps.removeSubrange((i - 1)...i)
                     i -= 1
                 }
-                else if i == 0 && d.last == sep.first! {
+                else if i == 0 && drive.last == sep.first! {
                     comps.remove(at: i)
                 }
                 else {
@@ -184,10 +164,11 @@ public class NTPath: BasePath {
                 i += 1
             }
         }
-        if d.isEmpty && comps.isEmpty {
+        if drive.isEmpty && comps.isEmpty {
             comps.append(curdir[...])
         }
-        return d + comps.joined(separator: sep)
+
+        return drive + comps.joined(separator: sep)
     }
 
     override public class func commonpath(_ paths: [String]) -> String {
@@ -198,20 +179,16 @@ public class NTPath: BasePath {
         var splitPaths = driveSplit.map { $0.1.split(separator: sep.first!) }
 
         guard
-            driveSplit.allSatisfy({ $0.1.hasPrefix(sep) })
-                || driveSplit.allSatisfy({ !$0.1.hasPrefix(sep) })
+            (driveSplit.allSatisfy({ $0.1.hasPrefix(sep) })
+                || driveSplit.allSatisfy({ !$0.1.hasPrefix(sep) })) &&
+            driveSplit.allSatisfy( { $0.0 == driveSplit[0].0 })
         else { return "" }
-        let sameDrive = driveSplit[0].0
-        for d in driveSplit {
-            if d.0 != sameDrive {
-                return ""
-            }
-        }
 
         let (drive, path) = splitdrive(normcase(paths[0]))
         var common = path.split(separator: sep.first!)
         common = common.filter { $0 != curdir }
         splitPaths = splitPaths.map { $0.filter { $0 != curdir } }
+
         var s1 = splitPaths[0]
         var s2 = splitPaths[0]
         for c in splitPaths {
