@@ -95,11 +95,18 @@ final class PosixPathTests: XCTestCase {
     func testIsfile() {
         XCTAssertTrue(PosixPath.isfile("README.md"))
         XCTAssertFalse(PosixPath.isfile("Sources"))
+        XCTAssertFalse(PosixPath.isfile("Source"))
     }
 
     func testIsdir() {
         XCTAssertFalse(PosixPath.isdir("README.md"))
+        XCTAssertFalse(PosixPath.isdir("README.mds"))
         XCTAssertTrue(PosixPath.isdir("Sources"))
+    }
+
+    func testIsmount() {
+        // TODO need more tests
+        XCTAssertTrue(PosixPath.ismount("/"))
     }
 
     func testGetsize() {
@@ -161,6 +168,7 @@ final class PosixPathTests: XCTestCase {
         ("testIslink", testIslink),
         ("testIsfile", testIsfile),
         ("testIsdir", testIsdir),
+        ("testIsmount", testIsmount),
         ("testGetsize", testGetsize),
         ("testExpanduser", testExpanduser),
         ("testNormpath", testNormpath),

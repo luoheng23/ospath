@@ -139,15 +139,30 @@ extension BasePath {
   }
 
   public class func ismount(_ path: String) -> Bool {
+    var s1: StatResult
+    var s2: StatResult
     do {
-      let _ = try OS.stat(path)
+      s1 = try OS.stat(path)
       if islink(path) {
         return false
       }
-      return true
     } catch {
       return false
     }
+  
+    let parent = realpath(join(path, pardir))
+    do {
+      s2 = try OS.stat(parent)
+    } catch {
+      return false
+    }
+    if s1.st_dev != s2.st_dev {
+      return true
+    }
+    if s1.st_ino == s2.st_ino {
+      return true
+    }
+    return false
   }
 }
 
@@ -326,7 +341,7 @@ extension BasePath {
     var newPath = path
     var r = rest
     if isabs(rest) {
-      r = String(r[newPath.index(after: newPath.startIndex)...])
+      r = String(r[r.index(after: r.startIndex)...])
       newPath = sep
     }
 
