@@ -1,11 +1,11 @@
 # ospath
 ![ospath](https://github.com/luoheng23/ospath/workflows/Swift/badge.svg)
 
-This package aims to provide same functions as os.path module in python.
+This package aims to provide same functions as `os.path` module in `python`.
 
 ## Introduction
 There are 3 classes:
-* `PosixPath` is for UNIX-like path
+* `PosixPath` is for UNIX-like path.
 * `NTPath` is for Windows path.
 * `OS` is to create file, folder, symlink, etc.
 
@@ -64,7 +64,7 @@ OS.home(user)   // get home directory of user
 ```
 
 ## Installation
-Put the following string in the dependencies of your `Package.swift`
+Put the following code in the dependencies of your `Package.swift`.
 ```swift
 .package(url: "https://github.com/luoheng23/ospath", from: "1.2.0")
 ```
