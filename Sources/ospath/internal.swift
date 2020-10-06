@@ -1,11 +1,6 @@
 import Foundation
 
-internal class Path {
-
-    static let fileManager = FileManager.default
-}
-
-extension String.SubSequence {
+internal extension String.SubSequence {
     mutating func lstrip(_ _set: Set<Character> = []) {
         guard !_set.isEmpty else { return }
         var idx = self.startIndex
@@ -33,7 +28,7 @@ extension String.SubSequence {
     }
 }
 
-extension String {
+internal extension String {
     mutating func lstrip(_ _set: Set<Character> = []) {
         guard !_set.isEmpty else { return }
         var idx = self.startIndex
