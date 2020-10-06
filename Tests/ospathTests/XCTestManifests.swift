@@ -7,7 +7,6 @@ import XCTest
             testCase(NTPathTests.allTests),
             testCase(OSTests.allTests),
             testCase(OSPathTests.allTests),
-            testCase(FilesTests.allTests),
         ]
     }
 #endif
