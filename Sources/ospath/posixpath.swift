@@ -1,1 +1,1 @@
-public class PosixPath: BasePath {}
+public class PosixPath: Path {}

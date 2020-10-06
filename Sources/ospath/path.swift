@@ -1,10 +1,12 @@
 import Foundation
 
-public class BasePath {
+public class Path {
     static let curdir = "."
     static let pardir = ".."
     static let extsep = "."
     static let tilde = "~"
+
+    static let fileManager = FileManager.default
 
     class var sep: String {
         return "/"  // posix path
@@ -146,7 +148,7 @@ public class BasePath {
 
 }
 
-extension BasePath {
+extension Path {
     public class func splitext(_ path: String) -> (head: String, tail: String) {
         return _splitext(
             path: path,
@@ -175,7 +177,7 @@ extension BasePath {
     }
 }
 
-extension BasePath {
+extension Path {
 
     public class func basename(_ path: String) -> String {
         return split(path).tail
@@ -338,7 +340,7 @@ extension BasePath {
     }
 }
 
-extension BasePath {
+extension Path {
     static func bigThan(_ s1: [String.SubSequence], _ s2: [String.SubSequence])
         -> Bool
     {

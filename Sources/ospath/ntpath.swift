@@ -1,6 +1,6 @@
 import Foundation
 
-public class NTPath: BasePath {
+public class NTPath: Path {
 
     public static var seps: Set<Character> = ["\\", "/"]
     public static var specialPrefixes = ["\\\\?\\", "\\\\.\\"]
