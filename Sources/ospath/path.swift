@@ -338,23 +338,6 @@ extension Path {
         userhome += path[idx...]
         return userhome == "" ? "/" : userhome
     }
-}
-
-extension Path {
-    static func bigThan(_ s1: [String.SubSequence], _ s2: [String.SubSequence])
-        -> Bool
-    {
-        let length = min(s1.count, s2.count)
-        for i in 0..<length {
-            if s1[i] > s2[i] {
-                return true
-            }
-            if s1[i] < s2[i] {
-                return false
-            }
-        }
-        return false
-    }
 
     public class func abspath(_ path: String) -> String {
         var p = path
@@ -370,7 +353,24 @@ extension Path {
         let (path, _) = _joinrealpath("", filename, &seen)
         return abspath(path)
     }
+}
 
+extension Path {
+
+    static func bigThan(_ s1: [String.SubSequence], _ s2: [String.SubSequence])
+        -> Bool
+    {
+        let length = min(s1.count, s2.count)
+        for i in 0..<length {
+            if s1[i] > s2[i] {
+                return true
+            }
+            if s1[i] < s2[i] {
+                return false
+            }
+        }
+        return false
+    }
     static func _joinrealpath(
         _ path: String,
         _ rest: String,
