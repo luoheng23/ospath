@@ -1,6 +1,6 @@
 import Foundation
 
-internal extension String.SubSequence {
+extension String.SubSequence {
     mutating func lstrip(_ _set: Set<Character> = []) {
         guard !_set.isEmpty else { return }
         var idx = self.startIndex
@@ -28,7 +28,7 @@ internal extension String.SubSequence {
     }
 }
 
-internal extension String {
+extension String {
     mutating func lstrip(_ _set: Set<Character> = []) {
         guard !_set.isEmpty else { return }
         var idx = self.startIndex
