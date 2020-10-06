@@ -2,8 +2,8 @@ import Foundation
 
 public class NTPath: Path {
 
-    public static var seps: Set<Character> = ["\\", "/"]
-    public static var specialPrefixes = ["\\\\?\\", "\\\\.\\"]
+    private static var seps: Set<Character> = ["\\", "/"]
+    private static var specialPrefixes = ["\\\\?\\", "\\\\.\\"]
 
     override public class var sep: String {
         return "\\"  // nt path
