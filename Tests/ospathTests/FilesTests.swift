@@ -26,7 +26,7 @@ import Foundation
 import XCTest
 @testable import ospath
 
-class FilesTests: XCTestCase {
+class ZFilesTests: XCTestCase {
     private var folder: Folder!
 
     // MARK: - XCTestCase
