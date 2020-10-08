@@ -311,7 +311,7 @@ private extension Storage where LocationType == Folder {
     }
 
     func createSubfolder(at folderPath: String) throws -> Folder {
-        let folderPath = path + folderPath.removingPrefix("/")
+        let folderPath = OSPath.join(path, folderPath)
 
         guard folderPath != path else {
             throw WriteError(path: folderPath, reason: .emptyPath)
@@ -331,7 +331,7 @@ private extension Storage where LocationType == Folder {
     }
 
     func createFile(at filePath: String, contents: Data?) throws -> File {
-        let filePath = path + filePath.removingPrefix("/")
+        let filePath = OSPath.join(path, filePath)
 
         guard let parentPath = makeParentPath(for: filePath) else {
             throw WriteError(path: filePath, reason: .emptyPath)

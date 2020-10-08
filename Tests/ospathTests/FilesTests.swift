@@ -105,7 +105,7 @@ class ZFilesTests: XCTestCase {
 
     func testDroppingLeadingSlashWhenCreatingFileAtPath() {
         performTest {
-            let path = "/a/b/c.txt"
+            let path = "./a/b/c.txt"
 
             XCTAssertFalse(folder.containsFile(at: path))
             try folder.createFile(at: path, contents: Data("Hello".utf8))

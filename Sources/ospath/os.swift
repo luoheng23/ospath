@@ -55,31 +55,47 @@ public class OS {
     }
 
     public static func mkdir(_ dir: String) throws {
-        try Path.fileManager.createDirectory(
-            atPath: dir,
-            withIntermediateDirectories: false
-        )
+        do {
+            try Path.fileManager.createDirectory(
+                atPath: dir,
+                withIntermediateDirectories: true
+            )
+        } catch {
+            throw WriteError(path: dir, reason: .folderCreationFailed(error))
+        }
     }
 
     public static func mkdir(_ dir: URL) throws {
-        try Path.fileManager.createDirectory(
-            at: dir,
-            withIntermediateDirectories: false
-        )
+        do {
+            try Path.fileManager.createDirectory(
+                at: dir,
+                withIntermediateDirectories: false
+            )
+        } catch {
+            throw WriteError(path: dir.path, reason: .folderCreationFailed(error))
+        }
     }
 
     public static func makedirs(_ dir: String) throws {
-        try Path.fileManager.createDirectory(
-            atPath: dir,
-            withIntermediateDirectories: true
-        )
+        do {
+            try Path.fileManager.createDirectory(
+                atPath: dir,
+                withIntermediateDirectories: true
+            )
+        } catch {
+            throw WriteError(path: dir, reason: .folderCreationFailed(error))
+        }
     }
 
     public static func makedirs(_ dir: URL) throws {
-        try Path.fileManager.createDirectory(
-            at: dir,
-            withIntermediateDirectories: true
-        )
+        do {
+            try Path.fileManager.createDirectory(
+                at: dir,
+                withIntermediateDirectories: true
+            )
+        } catch {
+            throw WriteError(path: dir.path, reason: .folderCreationFailed(error))
+        }
     }
 }
 
