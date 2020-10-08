@@ -134,12 +134,7 @@ extension OS {
     public static func home(_ user: String = "") -> String? {
         if user != "" {
             if #available(macOS 10.12, *) {
-                if let p = Path.fileManager.homeDirectory(forUser: user) {
-                    return p.path
-                }
-                else {
-                    return nil
-                }
+                return Path.fileManager.homeDirectory(forUser: user)?.path
             }
             else {
                 return NSHomeDirectoryForUser(user)
