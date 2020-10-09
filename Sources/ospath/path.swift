@@ -1,7 +1,7 @@
 import Foundation
 
 public class Path {
-    
+
     public var path: String
     public lazy var cls = type(of: self)
 
@@ -65,7 +65,9 @@ public class Path {
         return path
     }
 
-    public class func join(_ basePath: String, _ toJoinedPaths: String...) -> String {
+    public class func join(_ basePath: String, _ toJoinedPaths: String...)
+        -> String
+    {
         return join(basePath, toJoinedPaths)
     }
 
@@ -520,7 +522,6 @@ extension Array where Element == [String.SubSequence] {
     }
 }
 
-
 extension Path {
 
     public func join(_ toJoinedPaths: String...) -> Path {
@@ -576,11 +577,13 @@ extension Path {
     public var isExecutable: Bool { return cls.isExecutable(path) }
     public var isDeletable: Bool { return cls.isDeletable(path) }
 
-    func samefile(_ path: String) -> Bool { return cls.samefile(self.path, path) }
+    func samefile(_ path: String) -> Bool {
+        return cls.samefile(self.path, path)
+    }
 }
 
 extension Path: Equatable {
-    public static func ==(lhs: Path, rhs: Path) -> Bool {
+    public static func == (lhs: Path, rhs: Path) -> Bool {
         return lhs.path == rhs.path
     }
 }
@@ -592,11 +595,11 @@ extension Path: Comparable {
 }
 
 extension Path {
-    public static func +(lhs: Path, rhs: Path) -> Path {
+    public static func + (lhs: Path, rhs: Path) -> Path {
         return lhs.join(rhs)
     }
 
-    public static func +(lhs: Path, rhs: String) -> Path {
+    public static func + (lhs: Path, rhs: String) -> Path {
         return lhs.join(rhs)
     }
 
@@ -610,5 +613,7 @@ extension Path {
 }
 
 extension Path: CustomStringConvertible {
-    public var description: String { return "\(String(describing: self))(\"\(path)\")"}
+    public var description: String {
+        return "\(String(describing: self))(\"\(path)\")"
+    }
 }

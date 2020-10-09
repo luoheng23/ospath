@@ -17,7 +17,10 @@ final class ObjectPosixPathTests: XCTestCase {
             PosixPath("/foo").join("bar", "/bar", "baz"),
             PosixPath("/bar/baz")
         )
-        XCTAssertEqual(PosixPath("/foo").join("bar", "baz"), PosixPath("/foo/bar/baz"))
+        XCTAssertEqual(
+            PosixPath("/foo").join("bar", "baz"),
+            PosixPath("/foo/bar/baz")
+        )
         XCTAssertEqual(
             PosixPath("/foo/").join("bar/", "baz/"),
             PosixPath("/foo/bar/baz/")
@@ -25,17 +28,35 @@ final class ObjectPosixPathTests: XCTestCase {
     }
 
     func testSplit() {
-        XCTAssert(PosixPath("/foo/bar").split == (PosixPath("/foo"), PosixPath("bar")))
+        XCTAssert(
+            PosixPath("/foo/bar").split == (PosixPath("/foo"), PosixPath("bar"))
+        )
         XCTAssert(PosixPath("/").split == (PosixPath("/"), PosixPath("")))
         XCTAssert(PosixPath("foo").split == (PosixPath(""), PosixPath("foo")))
-        XCTAssert(PosixPath("////foo").split == (PosixPath("////"), PosixPath("foo")))
-        XCTAssert(PosixPath("//foo//bar").split == (PosixPath("//foo"), PosixPath("bar")))
+        XCTAssert(
+            PosixPath("////foo").split == (PosixPath("////"), PosixPath("foo"))
+        )
+        XCTAssert(
+            PosixPath("//foo//bar").split == (
+                PosixPath("//foo"), PosixPath("bar")
+            )
+        )
     }
 
     func splitextTest(_ path: String, _ filename: String, _ ext: String) {
-        XCTAssert(PosixPath(path).splitext == (PosixPath(filename), PosixPath(ext)))
-        XCTAssert(PosixPath("/" + path).splitext == (PosixPath("/" + filename), PosixPath(ext)))
-        XCTAssert(PosixPath("abc/" + path).splitext == (PosixPath("abc/" + filename), PosixPath(ext)))
+        XCTAssert(
+            PosixPath(path).splitext == (PosixPath(filename), PosixPath(ext))
+        )
+        XCTAssert(
+            PosixPath("/" + path).splitext == (
+                PosixPath("/" + filename), PosixPath(ext)
+            )
+        )
+        XCTAssert(
+            PosixPath("abc/" + path).splitext == (
+                PosixPath("abc/" + filename), PosixPath(ext)
+            )
+        )
         XCTAssert(
             PosixPath("abc.def/" + path).splitext == (
                 PosixPath("abc.def/" + filename), PosixPath(ext)
@@ -46,7 +67,11 @@ final class ObjectPosixPathTests: XCTestCase {
                 PosixPath("/abc.def/" + filename), PosixPath(ext)
             )
         )
-        XCTAssert(PosixPath(path + "/").splitext == (PosixPath(filename + ext + "/"), PosixPath("")))
+        XCTAssert(
+            PosixPath(path + "/").splitext == (
+                PosixPath(filename + ext + "/"), PosixPath("")
+            )
+        )
     }
 
     func testSplitext() {
@@ -138,12 +163,18 @@ final class ObjectPosixPathTests: XCTestCase {
         XCTAssertEqual(PosixPath("/").normpath, PosixPath("/"))
         XCTAssertEqual(PosixPath("//").normpath, PosixPath("//"))
         XCTAssertEqual(PosixPath("///").normpath, PosixPath("/"))
-        XCTAssertEqual(PosixPath("///foo/.//bar//").normpath, PosixPath("/foo/bar"))
+        XCTAssertEqual(
+            PosixPath("///foo/.//bar//").normpath,
+            PosixPath("/foo/bar")
+        )
         XCTAssertEqual(
             PosixPath("///foo/.//bar//.//..//.//baz").normpath,
-PosixPath(            "/foo/baz")
+            PosixPath("/foo/baz")
         )
-        XCTAssertEqual(PosixPath("///..//./foo/.//bar").normpath, PosixPath("/foo/bar"))
+        XCTAssertEqual(
+            PosixPath("///..//./foo/.//bar").normpath,
+            PosixPath("/foo/bar")
+        )
     }
 
     func testRealpath() {
@@ -177,7 +208,10 @@ PosixPath(            "/foo/baz")
 
         if OS.open(newfile) {
             _ = try? OS.symlink(newfile, link)
-            XCTAssertEqual(PosixPath(link).realpath, PosixPath(newfile).realpath)
+            XCTAssertEqual(
+                PosixPath(link).realpath,
+                PosixPath(newfile).realpath
+            )
             _ = try? OS.remove(newfile)
             _ = try? OS.remove(link)
         }
