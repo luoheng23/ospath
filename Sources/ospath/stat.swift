@@ -117,6 +117,7 @@ extension StatResult {
     var islink: Bool { st_type == .typeSymbolicLink }
     var isblock: Bool { st_type == .typeBlockSpecial }
     var ischaracter: Bool { st_type == .typeCharacterSpecial }
+    var exist: Bool { st_type != .typeUnknown }
 }
 
 extension StatResult: Equatable {
