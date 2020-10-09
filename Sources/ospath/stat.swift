@@ -31,9 +31,7 @@ public class StatResult {
 
     convenience init(at path: String) {
         self.init()
-        do {
-            let attrs = try Path.fileManager.attributesOfItem(atPath: path)
-            print(attrs)
+        if let attrs = try? Path.fileManager.attributesOfItem(atPath: path) {
             st_mode = attrs[.posixPermissions] as? Int
             st_ino = attrs[.systemFileNumber] as? Int
             st_dev = attrs[.systemNumber] as? Int
@@ -48,10 +46,6 @@ public class StatResult {
                 (attrs[.modificationDate] as? Date)?.timeIntervalSince1970
             st_ctime =
                 (attrs[.creationDate] as? Date)?.timeIntervalSince1970
-            print(self)
-        }
-        catch let err {
-            print(err)
         }
     }
 
@@ -116,3 +110,11 @@ extension StatResult: CustomStringConvertible {
     }
 }
 
+extension StatResult {
+    var isfile: Bool { st_type == .typeRegular }
+    var isdir: Bool { st_type == .typeDirectory }
+    var issocket: Bool { st_type == .typeSocket }
+    var islink: Bool { st_type == .typeSymbolicLink }
+    var isblock: Bool { st_type == .typeBlockSpecial }
+    var ischaracter: Bool { st_type == .typeCharacterSpecial }
+}

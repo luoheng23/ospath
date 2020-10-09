@@ -103,8 +103,17 @@ extension OS {
 
     static var environ = ProcessInfo.processInfo.environment
 
-    public static func stat(_ path: String) throws -> StatResult {
+    // Get the status of a file, always follow links
+    public static func stat(_ path: String, _ followSymlinks: Bool = true) throws -> StatResult {
+        if followSymlinks && OSPath.islink(path) {
+            return StatResult(at: OS.readlink(path))
+        }
         return StatResult(at: path)
+    }
+
+    // Get the status of a file, never follow link
+    public static func lstat(_ path: String) throws -> StatResult {
+        return try OS.stat(path, false)
     }
 }
 
