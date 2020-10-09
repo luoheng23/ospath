@@ -111,6 +111,7 @@ extension StatResult: CustomStringConvertible {
 }
 
 extension StatResult {
+    // file type information
     var isfile: Bool { st_type == .typeRegular }
     var isdir: Bool { st_type == .typeDirectory }
     var issocket: Bool { st_type == .typeSocket }

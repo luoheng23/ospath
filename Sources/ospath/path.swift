@@ -133,16 +133,7 @@ public class Path {
         else { return "" }
         var splitPaths = paths.map { $0.split(separator: sep.first!) }
         splitPaths = splitPaths.map { $0.filter { $0 != "" && $0 != curdir } }
-        var s1 = splitPaths[0]
-        var s2 = splitPaths[0]
-        for c in splitPaths {
-            if bigThan(c, s2) {
-                s2 = c
-            }
-            else if bigThan(s1, c) {
-                s1 = c
-            }
-        }
+        var (s1, s2) = splitPaths.minmax()!
         let pre = paths[0].hasPrefix(sep) ? sep : ""
         for i in 0..<s1.count {
             if s1[i] != s2[i] {
@@ -169,8 +160,7 @@ extension Path {
     public class func commonprefix(_ paths: [String]) -> String {
         guard !paths.isEmpty else { return "" }
 
-        let minP = paths.min()!
-        let maxP = paths.max()!
+        let (minP, maxP) = paths.minmax()!
 
         var idxMin = minP.startIndex
         var idxMax = maxP.startIndex
@@ -182,6 +172,36 @@ extension Path {
             idxMax = maxP.index(after: idxMax)
         }
         return minP
+    }
+    
+    public class func expanduser(_ path: String) -> String {
+        guard path.hasPrefix(tilde) else { return path }
+
+        let idxAfterTilde = path.index(after: path.startIndex)
+        let idx = path.firstIndex(where: { $0 == sep.first }) ?? path.endIndex
+        // ~ and ~user
+        let user = String(path[idxAfterTilde..<idx])
+
+        guard var userhome = OS.home(user) else { return path }
+        // remove tailed '/'
+        userhome.rstrip([sep.first!])
+        userhome += path[idx...]
+        return userhome == "" ? "/" : userhome
+    }
+
+    public class func abspath(_ path: String) -> String {
+        var p = path
+        if !isabs(path) {
+            let cwd = OS.getcwd()
+            p = join(cwd, path)
+        }
+        return normpath(p)
+    }
+
+    public class func realpath(_ filename: String) -> String {
+        var seen: [String: String] = [:]
+        let (path, _) = _joinrealpath("", filename, &seen)
+        return abspath(path)
     }
 }
 
@@ -267,52 +287,7 @@ extension Path {
         }
         return false
     }
-
-    public class func expanduser(_ path: String) -> String {
-        guard path.hasPrefix(tilde) else { return path }
-
-        let idxAfterTilde = path.index(after: path.startIndex)
-        let idx = path.firstIndex(where: { $0 == sep.first }) ?? path.endIndex
-        // ~ and ~user
-        let user = String(path[idxAfterTilde..<idx])
-
-        guard var userhome = OS.home(user) else { return path }
-        // remove tailed '/'
-        userhome.rstrip([sep.first!])
-        userhome += path[idx...]
-        return userhome == "" ? "/" : userhome
-    }
-
-    public class func abspath(_ path: String) -> String {
-        var p = path
-        if !isabs(path) {
-            let cwd = OS.getcwd()
-            p = join(cwd, path)
-        }
-        return normpath(p)
-    }
-
-    public class func realpath(_ filename: String) -> String {
-        var seen: [String: String] = [:]
-        let (path, _) = _joinrealpath("", filename, &seen)
-        return abspath(path)
-    }
 }
-
-// extension Array<String.SubSequence> {
-//     static func >(_ s1: [String.SubSequence], _ s2: [String.SubSequence]) -> Bool {
-//         let length = min(s1.count, s2.count)
-//         for i in 0..<length {
-//             if s1[i] > s2[i] {
-//                 return true
-//             }
-//             if s1[i] < s2[i] {
-//                 return false
-//             }
-//         }
-//         return false
-//     }
-// }
 
 extension Path {
 
@@ -496,5 +471,56 @@ extension String {
         guard !_set.isEmpty else { return }
         self.lstrip()
         self.rstrip()
+    }
+}
+
+
+extension Array where Element: Comparable {
+    static func >(_ s1: [Element], _ s2: [Element]) -> Bool {
+        let length = Swift.min(s1.count, s2.count)
+        for i in 0..<length {
+            if s1[i] > s2[i] {
+                return true
+            }
+            if s1[i] < s2[i] {
+                return false
+            }
+        }
+        return false
+    }
+
+    func minmax() -> (head: Element, tail: Element)? {
+        if count == 0 {
+            return nil
+        }
+        var s1 = self[0]
+        var s2 = self[0]
+        for i in 0..<count {
+            if self[i] > s1 {
+                s1 = self[i]
+            } else if s2 > self[i] {
+                s2 = self[i]
+            }
+        }
+        return (s1, s2)
+    }
+
+}
+
+extension Array where Element == [String.SubSequence] {
+    func minmax() -> (head: [String.SubSequence], tail: [String.SubSequence])? {
+        if count == 0 {
+            return nil
+        }
+        var s1 = self[0]
+        var s2 = self[0]
+        for i in 0..<count {
+            if self[i] > s1 {
+                s1 = self[i]
+            } else if s2 > self[i] {
+                s2 = self[i]
+            }
+        }
+        return (s1, s2)
     }
 }
