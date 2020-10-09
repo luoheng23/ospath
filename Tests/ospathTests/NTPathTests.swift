@@ -206,62 +206,6 @@ final class NTPathTests: XCTestCase {
         XCTAssertEqual(NTPath.dirname("//foo//ba"), "//foo")
     }
 
-    func testIslink() {
-        let filename = "sdafsdfhdsufhisfu232u3fjdsjhfksfs"
-        let newfile = filename + "1"
-        let link = filename + "2"
-        _ = try? OS.remove(newfile)
-        _ = try? OS.remove(link)
-        XCTAssertEqual(NTPath.islink(newfile), false)
-        XCTAssertEqual(NTPath.lexists(link), false)
-        XCTAssertEqual(NTPath.islink(newfile), false)
-
-        if OS.open(newfile) {
-            _ = try? OS.symlink(newfile, link)
-            XCTAssertEqual(NTPath.islink(link), true)
-            _ = try? OS.remove(newfile)
-            XCTAssertEqual(NTPath.islink(link), true)
-            XCTAssertEqual(NTPath.exists(link), false)
-            XCTAssertEqual(NTPath.lexists(link), true)
-            _ = try? OS.remove(link)
-        }
-    }
-
-    func testIsfile() {
-        XCTAssertTrue(NTPath.isfile("README.md"))
-        XCTAssertFalse(NTPath.isfile("Sources"))
-        XCTAssertFalse(NTPath.isfile("Source"))
-    }
-
-    func testIsdir() {
-        XCTAssertFalse(NTPath.isdir("README.md"))
-        XCTAssertFalse(NTPath.isdir("README.mds"))
-        XCTAssertTrue(NTPath.isdir("Sources"))
-    }
-
-    // ismount doesn't work for windows now
-    // func testIsmount() {
-    //     XCTAssertTrue(NTPath.ismount("c:\\"))
-    //     XCTAssertTrue(NTPath.ismount("C:\\"))
-    //     XCTAssertTrue(NTPath.ismount("c:/"))
-    //     XCTAssertTrue(NTPath.ismount("C:/"))
-    //     XCTAssertTrue(NTPath.ismount("\\\\.\\c:\\"))
-    //     XCTAssertTrue(NTPath.ismount("\\\\.\\C:\\"))
-    // }
-
-    func testGetsize() {
-        // if LICENSE changed, this test will fail
-        let filename = "LICENSE"
-        let size = 1064
-        XCTAssertEqual(NTPath.getsize(filename), size)
-    }
-
-    func testExpanduser() {
-        XCTAssertEqual(NTPath.expanduser("foo"), "foo")
-        let env = ProcessInfo.processInfo.environment
-        XCTAssertEqual(NTPath.expanduser("~"), env["HOME"] ?? "")
-    }
-
     func testNormpath() {
         XCTAssertEqual(NTPath.normpath("A//////././//.//B"), "A\\B")
         XCTAssertEqual(NTPath.normpath("A/./B"), "A\\B")
@@ -436,12 +380,6 @@ final class NTPathTests: XCTestCase {
         ("testSplitdrive", testSplitdrive),
         ("testBasename", testBasename),
         ("testDirname", testDirname),
-        ("testIslink", testIslink),
-        ("testIsfile", testIsfile),
-        ("testIsdir", testIsdir),
-        // ("testIsmount", testIsmount),
-        ("testGetsize", testGetsize),
-        ("testExpanduser", testExpanduser),
         ("testNormpath", testNormpath),
         ("testRealpath", testRealpath),
         ("testRealpathBasic", testRealpathBasic),
