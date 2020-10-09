@@ -77,6 +77,14 @@ public class Path {
         return (String(head), String(tail))
     }
 
+    public class func basename(_ path: String) -> String {
+        return split(path).tail
+    }
+
+    public class func dirname(_ path: String) -> String {
+        return split(path).head
+    }
+
     // nothing to do with posixpath
     public class func splitdrive(_ path: String) -> (head: String, tail: String)
     {
@@ -179,78 +187,46 @@ extension Path {
 
 extension Path {
 
-    public class func basename(_ path: String) -> String {
-        return split(path).tail
-    }
-
-    public class func dirname(_ path: String) -> String {
-        return split(path).head
-    }
-
+    // Test whether a path is a symbolic link
     public class func islink(_ path: String) -> Bool {
-        do {
-            let attrs = try Path.fileManager.attributesOfItem(atPath: path)
-            if let attr = attrs[.type] {
-                return (attr as! FileAttributeType) == .typeSymbolicLink
-            }
-            return false
-        }
-        catch {
-            return false
-        }
+        return (try? OS.lstat(path))?.islink ?? false
     }
 
+    // Test whether a path exists. Returns True for broken symbolic links
     public class func lexists(_ path: String) -> Bool {
-        do {
-            let _ = try Path.fileManager.destinationOfSymbolicLink(atPath: path)
-            return true
-        }
-        catch {
-            return false
-        }
+        return islink(path) || exists(path)
     }
 
+    // Test whether a path exists. Returns False for broken symbolic links
     public class func exists(_ path: String) -> Bool {
-        return Path.fileManager.fileExists(atPath: path)
+        return (try? OS.stat(path))?.exist ?? false
     }
 
+    // This follows symbolic links, so both islink() and isfile() can be true
+    // for the same path on systems that support symlinks
     public class func isfile(_ path: String) -> Bool {
-        var isDir: ObjCBool = false
-        if Path.fileManager.fileExists(atPath: path, isDirectory: &isDir) {
-            return !isDir.boolValue
-        }
-        return false
+        return (try? OS.stat(path))?.isfile ?? false
+
     }
 
+    // This follows symbolic links, so both islink() and isdir() can be true
+    // for the same path on systems that support symlinks
     public class func isdir(_ path: String) -> Bool {
-        var isDir: ObjCBool = false
-        if Path.fileManager.fileExists(atPath: path, isDirectory: &isDir) {
-            return isDir.boolValue
-        }
-        return false
+        return (try? OS.stat(path))?.isdir ?? false
     }
 
     public class func ismount(_ path: String) -> Bool {
-        var s1: StatResult
-        var s2: StatResult
-        do {
-            s1 = try OS.stat(path)
-            if islink(path) {
-                return false
+        // s1 must not be link
+        if islink(path) {
+            return false
+        }
+        if let s1 = try? OS.lstat(path) {
+            let parent = realpath(join(path, pardir))
+            if let s2 = try? OS.lstat(parent) {
+                return s1 == s2
             }
         }
-        catch {
-            return false
-        }
-
-        let parent = realpath(join(path, pardir))
-        do {
-            s2 = try OS.stat(parent)
-        }
-        catch {
-            return false
-        }
-        return samestat(s1, s2)
+        return false
     }
 
     public class func getsize(_ filename: String) -> Int? {
@@ -285,19 +261,11 @@ extension Path {
         return Path.fileManager.isDeletableFile(atPath: filename)
     }
 
-    class func samestat(_ stat1: StatResult, _ stat2: StatResult) -> Bool {
-        return stat1.st_ino == stat2.st_ino && stat1.st_dev == stat2.st_dev
-    }
-
     public class func samefile(_ file1: String, _ file2: String) -> Bool {
-        do {
-            let stat1 = try OS.stat(file1)
-            let stat2 = try OS.stat(file2)
-            return samestat(stat1, stat2)
+        if let stat1 = try? OS.stat(file1), let stat2 = try? OS.stat(file2) {
+            return stat1 == stat2
         }
-        catch {
-            return false
-        }
+        return false
     }
 
     public class func expanduser(_ path: String) -> String {
@@ -330,6 +298,21 @@ extension Path {
         return abspath(path)
     }
 }
+
+// extension Array<String.SubSequence> {
+//     static func >(_ s1: [String.SubSequence], _ s2: [String.SubSequence]) -> Bool {
+//         let length = min(s1.count, s2.count)
+//         for i in 0..<length {
+//             if s1[i] > s2[i] {
+//                 return true
+//             }
+//             if s1[i] < s2[i] {
+//                 return false
+//             }
+//         }
+//         return false
+//     }
+// }
 
 extension Path {
 
