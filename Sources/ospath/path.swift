@@ -1,7 +1,7 @@
 import Foundation
 
 public class Path {
-    
+
     public var path: String
     public lazy var cls = type(of: self)
 
@@ -65,7 +65,9 @@ public class Path {
         return path
     }
 
-    public class func join(_ basePath: String, _ toJoinedPaths: String...) -> String {
+    public class func join(_ basePath: String, _ toJoinedPaths: String...)
+        -> String
+    {
         return join(basePath, toJoinedPaths)
     }
 
@@ -156,6 +158,10 @@ public class Path {
         return pre + common.joined(separator: sep)
     }
 
+    public class func commonpath(_ paths: String...) -> String {
+        return commonpath(paths)
+    }
+
     public class func splitext(_ path: String) -> (head: String, tail: String) {
         return _splitext(
             path: path,
@@ -180,6 +186,10 @@ public class Path {
             idxMax = maxP.index(after: idxMax)
         }
         return minP
+    }
+
+    public class func commonprefix(_ paths: String...) -> String {
+        return commonprefix(paths)
     }
 
     public class func abspath(_ path: String) -> String {
@@ -414,19 +424,6 @@ extension Path {
 
 extension Path {
 
-    public func join(_ toJoinedPaths: String...) -> Path {
-        let newPath = cls.join(path, toJoinedPaths)
-        // return a new object
-        return cls.init(newPath)
-    }
-
-    public func join(_ toJoinedPaths: Path...) -> Path {
-        let toJoinedPaths = toJoinedPaths.map { $0.path }
-        let newPath = cls.join(path, toJoinedPaths)
-        // return a new object
-        return cls.init(newPath)
-    }
-
     public var normcase: Path { return cls.init(cls.normcase(path)) }
     public var split: (head: Path, tail: Path) {
         let (head, tail) = cls.split(path)
@@ -467,11 +464,68 @@ extension Path {
     public var isExecutable: Bool { return cls.isExecutable(path) }
     public var isDeletable: Bool { return cls.isDeletable(path) }
 
-    func samefile(_ path: String) -> Bool { return cls.samefile(self.path, path) }
+}
+
+extension Path {
+
+    public func join(_ toJoinedPaths: [String]) -> Path {
+        let newPath = cls.join(path, toJoinedPaths)
+        // return a new object
+        return cls.init(newPath)
+    }
+
+    public func join(_ toJoinedPaths: String...) -> Path {
+        return join(toJoinedPaths)
+    }
+
+    public func join(_ toJoinedPaths: [Path]) -> Path {
+        return join(toJoinedPaths.map { $0.path })
+    }
+
+    public func join(_ toJoinedPaths: Path...) -> Path {
+        return join(toJoinedPaths.map { $0.path })
+    }
+
+    public func commonpath(_ paths: [String]) -> Path {
+        return cls.init(cls.commonpath(cls.commonpath(paths), path))
+    }
+
+    public func commonpath(_ paths: String...) -> Path {
+        return commonpath(paths)
+    }
+
+    public func commonpath(_ paths: Path...) -> Path {
+        return commonpath(paths.map { $0.path })
+    }
+
+    public func commonpath(_ paths: [Path]) -> Path {
+        return commonpath(paths.map { $0.path })
+    }
+
+    public func commonprefix(_ paths: [String]) -> Path {
+        return cls.init(cls.commonprefix(cls.commonprefix(paths), path))
+    }
+
+    public func commonprefix(_ paths: String...) -> Path {
+        return commonprefix(paths)
+    }
+
+    public func commonprefix(_ paths: Path...) -> Path {
+        return commonprefix(paths.map { $0.path })
+    }
+
+    public func commonprefix(_ paths: [Path]) -> Path {
+        return commonprefix(paths.map { $0.path })
+    }
+
+    public func samefile(_ path: Path) -> Bool { return samefile(path.path) }
+    public func samefile(_ path: String) -> Bool {
+        return cls.samefile(self.path, path)
+    }
 }
 
 extension Path: Equatable {
-    public static func ==(lhs: Path, rhs: Path) -> Bool {
+    public static func == (lhs: Path, rhs: Path) -> Bool {
         return lhs.path == rhs.path
     }
 }
@@ -483,11 +537,11 @@ extension Path: Comparable {
 }
 
 extension Path {
-    public static func +(lhs: Path, rhs: Path) -> Path {
+    public static func + (lhs: Path, rhs: Path) -> Path {
         return lhs.join(rhs)
     }
 
-    public static func +(lhs: Path, rhs: String) -> Path {
+    public static func + (lhs: Path, rhs: String) -> Path {
         return lhs.join(rhs)
     }
 
@@ -501,5 +555,7 @@ extension Path {
 }
 
 extension Path: CustomStringConvertible {
-    public var description: String { return "\(String(describing: self))(\"\(path)\")"}
+    public var description: String {
+        return "\(String(describing: self))(\"\(path)\")"
+    }
 }

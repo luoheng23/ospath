@@ -1,4 +1,3 @@
-
 extension String.SubSequence {
     mutating func lstrip(_ _set: Set<Character> = []) {
         guard !_set.isEmpty else { return }
