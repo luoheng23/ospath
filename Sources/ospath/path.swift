@@ -585,12 +585,26 @@ extension Path: Equatable {
     }
 }
 
+extension Path: Comparable {
+    public static func < (lhs: Path, rhs: Path) -> Bool {
+        return lhs.path < rhs.path
+    }
+}
+
 extension Path {
     public static func +(lhs: Path, rhs: Path) -> Path {
         return lhs.join(rhs)
     }
 
+    public static func +(lhs: Path, rhs: String) -> Path {
+        return lhs.join(rhs)
+    }
+
     public static func += (lhs: inout Path, rhs: Path) {
+        lhs = lhs.join(rhs)
+    }
+
+    public static func += (lhs: inout Path, rhs: String) {
         lhs = lhs.join(rhs)
     }
 }
