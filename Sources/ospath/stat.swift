@@ -1,22 +1,116 @@
+import Foundation
+
 public class StatResult {
-    public var st_mode: Int = -1
-    public var st_ino: Int = -1
-    public var st_dev: Int = -1
-    public var st_nlink: Int = -1
-    public var st_uid: Int = -1
-    public var st_gid: Int = -1
-    public var st_size: Int = -1
-    public var st_atime: Double = -1
-    public var st_mtime: Double = -1
-    public var st_ctime: Double = -1
+    // File mode: file type and file mode bits (permissions)
+    public var st_mode: Int?
+    // the inode number on Unix, the file index on Windows
+    public var st_ino: Int?
+    // identifier of the device on which this file resides
+    public var st_dev: Int?
+    // number of hard links
+    public var st_nlink: Int?
+    // user identifier of the file owner
+    public var st_uid: Int?
+    // group identifier of the file owner
+    public var st_gid: Int?
+    // size of the file in bytes
+    public var st_size: Int?
+    // access time
+    // TODO Find a way to get the access time
+    public var st_atime: Double?
+    // modification time
+    public var st_mtime: Double?
+    // creation time or metadata change time
+    public var st_ctime: Double?
+    // owner name
+    public var st_owner: String?
+    // group owner name
+    public var st_groupOwner: String?
+    // file type
+    public var st_type: FileAttributeType
+
+    convenience init(at path: String) {
+        self.init()
+        do {
+            let attrs = try Path.fileManager.attributesOfItem(atPath: path)
+            print(attrs)
+            st_mode = attrs[.posixPermissions] as? Int
+            st_ino = attrs[.systemFileNumber] as? Int
+            st_dev = attrs[.systemNumber] as? Int
+            st_nlink = attrs[.referenceCount] as? Int
+            st_uid = attrs[.ownerAccountID] as? Int
+            st_gid = attrs[.groupOwnerAccountID] as? Int
+            st_size = attrs[.size] as? Int
+            st_type = (attrs[.type] as? FileAttributeType) ?? .typeUnknown
+            st_owner = attrs[.ownerAccountName] as? String
+            st_groupOwner = attrs[.groupOwnerAccountName] as? String
+            st_mtime =
+                (attrs[.modificationDate] as? Date)?.timeIntervalSince1970
+            st_ctime =
+                (attrs[.creationDate] as? Date)?.timeIntervalSince1970
+            print(self)
+        }
+        catch let err {
+            print(err)
+        }
+    }
+
+    init() {
+        st_mode = nil
+        st_ino = nil
+        st_dev = nil
+        st_nlink = nil
+        st_uid = nil
+        st_gid = nil
+        st_size = nil
+        st_atime = nil
+        st_mtime = nil
+        st_ctime = nil
+        st_owner = nil
+        st_groupOwner = nil
+        st_type = .typeUnknown
+    }
 }
 
 extension StatResult: CustomStringConvertible {
     public var description: String {
         var str = ""
-        str +=
-            "st_mode=\(st_mode), st_ino=\(st_ino), st_dev=\(st_dev), st_nlink=\(st_nlink), st_uid=\(st_uid), st_gid=\(st_gid), st_size=\(st_size), st_ctime=\(st_ctime), "
-        str += "st_atime=\(st_atime), st_mtime=\(st_mtime)"
+        if let s = st_mode {
+            str += "st_mode=\(s)"
+        }
+        if let s = st_ino {
+            str += ", st_ino=\(s)"
+        }
+        if let s = st_dev {
+            str += ", st_dev=\(s)"
+        }
+        if let s = st_nlink {
+            str += ", st_nlink=\(s)"
+        }
+        if let s = st_uid {
+            str += ", st_uid=\(s)"
+        }
+        if let s = st_gid {
+            str += ", st_gid=\(s)"
+        }
+        if let s = st_owner {
+            str += ", st_owner=\(s)"
+        }
+        if let s = st_groupOwner {
+            str += ", st_groupOwner=\(s)"
+        }
+        if let s = st_size {
+            str += ", st_size=\(s)"
+        }
+        if let s = st_atime {
+            str += ", st_atime=\(s)"
+        }
+        if let s = st_mtime {
+            str += ", st_mtime=\(s)"
+        }
+        if let s = st_ctime {
+            str += ", st_ctime=\(s)"
+        }
         str = "StatResult(\(str))"
         return str
     }

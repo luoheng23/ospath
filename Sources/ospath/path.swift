@@ -253,44 +253,20 @@ extension Path {
         return samestat(s1, s2)
     }
 
-    public class func getsize(_ filename: String) -> Int {
-        do {
-            let stat = try OS.stat(filename)
-            return stat.st_size
-        }
-        catch {
-            return -1
-        }
+    public class func getsize(_ filename: String) -> Int? {
+        return (try? OS.stat(filename))?.st_size
     }
 
-    public class func getmtime(_ filename: String) -> Double {
-        do {
-            let stat = try OS.stat(filename)
-            return stat.st_mtime
-        }
-        catch {
-            return -1
-        }
+    public class func getmtime(_ filename: String) -> Double? {
+        return (try? OS.stat(filename))?.st_mtime
     }
 
-    public class func getctime(_ filename: String) -> Double {
-        do {
-            let stat = try OS.stat(filename)
-            return stat.st_ctime
-        }
-        catch {
-            return -1
-        }
+    public class func getctime(_ filename: String) -> Double? {
+        return (try? OS.stat(filename))?.st_ctime
     }
 
-    public class func getatime(_ filename: String) -> Double {
-        do {
-            let stat = try OS.stat(filename)
-            return stat.st_atime
-        }
-        catch {
-            return -1
-        }
+    public class func getatime(_ filename: String) -> Double? {
+        return (try? OS.stat(filename))?.st_atime
     }
 
     public class func isReadable(_ filename: String) -> Bool {
