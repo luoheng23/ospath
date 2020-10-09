@@ -190,16 +190,7 @@ public class NTPath: Path {
         common = common.filter { $0 != curdir }
         splitPaths = splitPaths.map { $0.filter { $0 != curdir } }
 
-        var s1 = splitPaths[0]
-        var s2 = splitPaths[0]
-        for c in splitPaths {
-            if bigThan(c, s2) {
-                s2 = c
-            }
-            else if bigThan(s1, c) {
-                s1 = c
-            }
-        }
+        let (s1, s2) = splitPaths.minmax()!
         let pre = path.hasPrefix(sep) ? drive + sep : drive
         for i in 0..<s1.count {
             if s1[i] != s2[i] {
