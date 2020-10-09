@@ -106,7 +106,6 @@ extension OS {
     // Get the status of a file, always follow links
     public static func stat(_ path: String, _ followSymlinks: Bool = true) throws -> StatResult {
         if followSymlinks && OSPath.islink(path) {
-            print(OS.readlink(path), path)
             return StatResult(at: OS.readlink(path))
         }
         return StatResult(at: path)

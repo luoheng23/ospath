@@ -133,7 +133,7 @@ public class Path {
         else { return "" }
         var splitPaths = paths.map { $0.split(separator: sep.first!) }
         splitPaths = splitPaths.map { $0.filter { $0 != "" && $0 != curdir } }
-        var (s1, s2) = splitPaths.minmax()!
+        let (s1, s2) = splitPaths.minmax()!
         let pre = paths[0].hasPrefix(sep) ? sep : ""
         for i in 0..<s1.count {
             if s1[i] != s2[i] {
@@ -145,9 +145,6 @@ public class Path {
         return pre + common.joined(separator: sep)
     }
 
-}
-
-extension Path {
     public class func splitext(_ path: String) -> (head: String, tail: String) {
         return _splitext(
             path: path,
@@ -173,21 +170,6 @@ extension Path {
         }
         return minP
     }
-    
-    public class func expanduser(_ path: String) -> String {
-        guard path.hasPrefix(tilde) else { return path }
-
-        let idxAfterTilde = path.index(after: path.startIndex)
-        let idx = path.firstIndex(where: { $0 == sep.first }) ?? path.endIndex
-        // ~ and ~user
-        let user = String(path[idxAfterTilde..<idx])
-
-        guard var userhome = OS.home(user) else { return path }
-        // remove tailed '/'
-        userhome.rstrip([sep.first!])
-        userhome += path[idx...]
-        return userhome == "" ? "/" : userhome
-    }
 
     public class func abspath(_ path: String) -> String {
         var p = path
@@ -202,6 +184,24 @@ extension Path {
         var seen: [String: String] = [:]
         let (path, _) = _joinrealpath("", filename, &seen)
         return abspath(path)
+    }
+}
+
+extension Path {
+    
+    public class func expanduser(_ path: String) -> String {
+        guard path.hasPrefix(tilde) else { return path }
+
+        let idxAfterTilde = path.index(after: path.startIndex)
+        let idx = path.firstIndex(where: { $0 == sep.first }) ?? path.endIndex
+        // ~ and ~user
+        let user = String(path[idxAfterTilde..<idx])
+
+        guard var userhome = OS.home(user) else { return path }
+        // remove tailed '/'
+        userhome.rstrip([sep.first!])
+        userhome += path[idx...]
+        return userhome == "" ? "/" : userhome
     }
 }
 
