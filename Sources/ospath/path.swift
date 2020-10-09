@@ -188,7 +188,7 @@ public class Path {
 }
 
 extension Path {
-    
+
     public class func expanduser(_ path: String) -> String {
         guard path.hasPrefix(tilde) else { return path }
 
@@ -401,9 +401,6 @@ extension Path {
     }
 }
 
-
-
-
 extension String.SubSequence {
     mutating func lstrip(_ _set: Set<Character> = []) {
         guard !_set.isEmpty else { return }
@@ -460,9 +457,8 @@ extension String {
     }
 }
 
-
 extension Array where Element: Comparable {
-    static func >(_ s1: [Element], _ s2: [Element]) -> Bool {
+    static func > (_ s1: [Element], _ s2: [Element]) -> Bool {
         let length = Swift.min(s1.count, s2.count)
         for i in 0..<length {
             if s1[i] > s2[i] {
@@ -484,7 +480,8 @@ extension Array where Element: Comparable {
         for i in 0..<count {
             if self[i] > s1 {
                 s1 = self[i]
-            } else if s2 > self[i] {
+            }
+            else if s2 > self[i] {
                 s2 = self[i]
             }
         }
@@ -503,7 +500,8 @@ extension Array where Element == [String.SubSequence] {
         for i in 0..<count {
             if self[i] > s1 {
                 s1 = self[i]
-            } else if s2 > self[i] {
+            }
+            else if s2 > self[i] {
                 s2 = self[i]
             }
         }

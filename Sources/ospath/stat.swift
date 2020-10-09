@@ -122,11 +122,12 @@ extension StatResult {
 }
 
 extension StatResult: Equatable {
-    public static func ==(_ stat1: StatResult, _ stat2: StatResult) -> Bool {
+    public static func == (_ stat1: StatResult, _ stat2: StatResult) -> Bool {
         if let ino1 = stat1.st_ino, let ino2 = stat2.st_ino,
-            let dev1 = stat1.st_dev, let dev2 = stat2.st_dev {
-                return ino1 == ino2 && dev1 == dev2
-            }
+            let dev1 = stat1.st_dev, let dev2 = stat2.st_dev
+        {
+            return ino1 == ino2 && dev1 == dev2
+        }
         return false
     }
 }

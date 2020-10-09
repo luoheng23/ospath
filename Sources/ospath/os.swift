@@ -60,7 +60,8 @@ public class OS {
                 atPath: dir,
                 withIntermediateDirectories: true
             )
-        } catch {
+        }
+        catch {
             throw WriteError(path: dir, reason: .folderCreationFailed(error))
         }
     }
@@ -71,8 +72,12 @@ public class OS {
                 at: dir,
                 withIntermediateDirectories: false
             )
-        } catch {
-            throw WriteError(path: dir.path, reason: .folderCreationFailed(error))
+        }
+        catch {
+            throw WriteError(
+                path: dir.path,
+                reason: .folderCreationFailed(error)
+            )
         }
     }
 
@@ -82,7 +87,8 @@ public class OS {
                 atPath: dir,
                 withIntermediateDirectories: true
             )
-        } catch {
+        }
+        catch {
             throw WriteError(path: dir, reason: .folderCreationFailed(error))
         }
     }
@@ -93,8 +99,12 @@ public class OS {
                 at: dir,
                 withIntermediateDirectories: true
             )
-        } catch {
-            throw WriteError(path: dir.path, reason: .folderCreationFailed(error))
+        }
+        catch {
+            throw WriteError(
+                path: dir.path,
+                reason: .folderCreationFailed(error)
+            )
         }
     }
 }
@@ -104,7 +114,9 @@ extension OS {
     static var environ = ProcessInfo.processInfo.environment
 
     // Get the status of a file, always follow links
-    public static func stat(_ path: String, _ followSymlinks: Bool = true) throws -> StatResult {
+    public static func stat(_ path: String, _ followSymlinks: Bool = true)
+        throws -> StatResult
+    {
         if followSymlinks && OSPath.islink(path) {
             return StatResult(at: OS.readlink(path))
         }
