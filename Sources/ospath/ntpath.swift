@@ -41,7 +41,7 @@ public class NTPath: Path {
     // join pathnames
     override public class func join(
         _ basePath: String,
-        _ toJoinedPaths: String...
+        _ toJoinedPaths: [String]
     ) -> String {
         var (drive, path) = splitdrive(basePath)
         for p in toJoinedPaths {

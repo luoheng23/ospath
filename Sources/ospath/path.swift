@@ -1,6 +1,13 @@
 import Foundation
 
 public class Path {
+    
+    public var path: String
+    public lazy var cls = type(of: self)
+
+    required init(_ path: String = "") {
+        self.path = path
+    }
     static let curdir = "."
     static let pardir = ".."
     static let extsep = "."
@@ -39,7 +46,7 @@ public class Path {
     }
 
     // join pathnames
-    public class func join(_ basePath: String, _ toJoinedPaths: String...)
+    public class func join(_ basePath: String, _ toJoinedPaths: [String])
         -> String
     {
         var path = basePath
@@ -56,6 +63,10 @@ public class Path {
             }
         }
         return path
+    }
+
+    public class func join(_ basePath: String, _ toJoinedPaths: String...) -> String {
+        return join(basePath, toJoinedPaths)
     }
 
     // split a path in head (everything up to the last '/') and tail (the rest)
@@ -506,5 +517,80 @@ extension Array where Element == [String.SubSequence] {
             }
         }
         return (s1, s2)
+    }
+}
+
+
+extension Path {
+
+    public func join(_ toJoinedPaths: String...) -> Path {
+        let newPath = cls.join(path, toJoinedPaths)
+        // return a new object
+        return cls.init(newPath)
+    }
+
+    public func join(_ toJoinedPaths: Path...) -> Path {
+        let toJoinedPaths = toJoinedPaths.map { $0.path }
+        let newPath = cls.join(path, toJoinedPaths)
+        // return a new object
+        return cls.init(newPath)
+    }
+
+    public var normcase: Path { return cls.init(cls.normcase(path)) }
+    public var split: (head: Path, tail: Path) {
+        let (head, tail) = cls.split(path)
+        return (cls.init(head), cls.init(tail))
+    }
+    public var basename: Path { return split.tail }
+    public var dirname: Path { return split.head }
+    public var splitdrive: (head: Path, tail: Path) {
+        let (head, tail) = cls.splitdrive(path)
+        return (cls.init(head), cls.init(tail))
+    }
+    public var normpath: Path { return cls.init(cls.normpath(path)) }
+    public var splitext: (head: Path, tail: Path) {
+        let (head, tail) = cls.splitext(path)
+        return (cls.init(head), cls.init(tail))
+    }
+    public var abspath: Path { return cls.init(cls.abspath(path)) }
+    public var realpath: Path { return cls.init(cls.realpath(path)) }
+    public var expanduser: Path { return cls.init(cls.expanduser(path)) }
+
+    public var isabs: Bool { return cls.isabs(path) }
+    // file operation
+    public var islink: Bool { return cls.islink(path) }
+    public var lexists: Bool { return cls.lexists(path) }
+    public var exists: Bool { return cls.exists(path) }
+
+    public var isfile: Bool { return cls.isfile(path) }
+    public var isdir: Bool { return cls.isdir(path) }
+    public var ismount: Bool { return cls.ismount(path) }
+
+    public var getsize: Int? { return cls.getsize(path) }
+    public var getmtime: Double? { return cls.getmtime(path) }
+    public var getctime: Double? { return cls.getctime(path) }
+    public var getatime: Double? { return cls.getatime(path) }
+
+    public var isReadable: Bool { return cls.isReadable(path) }
+    public var isWritable: Bool { return cls.isWritable(path) }
+    public var isExecutable: Bool { return cls.isExecutable(path) }
+    public var isDeletable: Bool { return cls.isDeletable(path) }
+
+    func samefile(_ path: String) -> Bool { return cls.samefile(self.path, path) }
+}
+
+extension Path: Equatable {
+    public static func ==(lhs: Path, rhs: Path) -> Bool {
+        return lhs.path == rhs.path
+    }
+}
+
+extension Path {
+    public static func +(lhs: Path, rhs: Path) -> Path {
+        return lhs.join(rhs)
+    }
+
+    public static func += (lhs: inout Path, rhs: Path) {
+        lhs = lhs.join(rhs)
     }
 }
