@@ -1,7 +1,7 @@
 import Foundation
 
 public class Path {
-
+    
     public var path: String
     public lazy var cls = type(of: self)
 
@@ -65,9 +65,7 @@ public class Path {
         return path
     }
 
-    public class func join(_ basePath: String, _ toJoinedPaths: String...)
-        -> String
-    {
+    public class func join(_ basePath: String, _ toJoinedPaths: String...) -> String {
         return join(basePath, toJoinedPaths)
     }
 
@@ -191,6 +189,7 @@ public class Path {
     public class func commonprefix(_ paths: String...) -> String {
         return commonprefix(paths)
     }
+
 
     public class func abspath(_ path: String) -> String {
         var p = path
@@ -519,13 +518,11 @@ extension Path {
     }
 
     public func samefile(_ path: Path) -> Bool { return samefile(path.path) }
-    public func samefile(_ path: String) -> Bool {
-        return cls.samefile(self.path, path)
-    }
+    public func samefile(_ path: String) -> Bool { return cls.samefile(self.path, path) }
 }
 
 extension Path: Equatable {
-    public static func == (lhs: Path, rhs: Path) -> Bool {
+    public static func ==(lhs: Path, rhs: Path) -> Bool {
         return lhs.path == rhs.path
     }
 }
@@ -537,11 +534,11 @@ extension Path: Comparable {
 }
 
 extension Path {
-    public static func + (lhs: Path, rhs: Path) -> Path {
+    public static func +(lhs: Path, rhs: Path) -> Path {
         return lhs.join(rhs)
     }
 
-    public static func + (lhs: Path, rhs: String) -> Path {
+    public static func +(lhs: Path, rhs: String) -> Path {
         return lhs.join(rhs)
     }
 
@@ -555,7 +552,6 @@ extension Path {
 }
 
 extension Path: CustomStringConvertible {
-    public var description: String {
-        return "\(String(describing: self))(\"\(path)\")"
-    }
+    public var description: String { return "\(String(describing: self))(\"\(path)\")"}
 }
+
