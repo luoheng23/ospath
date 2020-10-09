@@ -118,3 +118,13 @@ extension StatResult {
     var isblock: Bool { st_type == .typeBlockSpecial }
     var ischaracter: Bool { st_type == .typeCharacterSpecial }
 }
+
+extension StatResult: Equatable {
+    public static func ==(_ stat1: StatResult, _ stat2: StatResult) -> Bool {
+        if let ino1 = stat1.st_ino, let ino2 = stat2.st_ino,
+            let dev1 = stat1.st_dev, let dev2 = stat2.st_dev {
+                return ino1 == ino2 && dev1 == dev2
+            }
+        return false
+    }
+}
