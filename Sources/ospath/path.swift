@@ -566,10 +566,10 @@ extension Path {
     public var isdir: Bool { return cls.isdir(path) }
     public var ismount: Bool { return cls.ismount(path) }
 
-    public var getsize: Int? { return cls.getsize(path) }
-    public var getmtime: Double? { return cls.getmtime(path) }
-    public var getctime: Double? { return cls.getctime(path) }
-    public var getatime: Double? { return cls.getatime(path) }
+    public var size: Int? { return cls.getsize(path) }
+    public var mtime: Double? { return cls.getmtime(path) }
+    public var ctime: Double? { return cls.getctime(path) }
+    public var atime: Double? { return cls.getatime(path) }
 
     public var isReadable: Bool { return cls.isReadable(path) }
     public var isWritable: Bool { return cls.isWritable(path) }
