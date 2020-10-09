@@ -608,3 +608,7 @@ extension Path {
         lhs = lhs.join(rhs)
     }
 }
+
+extension Path: CustomStringConvertible {
+    public var description: String { return "\(String(describing: self))(\"\(path)\")"}
+}
