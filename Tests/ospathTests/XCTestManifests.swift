@@ -9,6 +9,7 @@ import XCTest
             testCase(ObjectNTPathTests.allTests),
             testCase(OSTests.allTests),
             testCase(OSPathTests.allTests),
+            testCase(FileReaderWriterTests.allTests),
         ]
     }
 #endif
