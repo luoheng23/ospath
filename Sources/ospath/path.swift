@@ -1,7 +1,7 @@
 import Foundation
 
 public class Path: PathObject {
-    
+
     public var path: String
     public lazy var cls = type(of: self)
 
@@ -67,7 +67,9 @@ public class Path: PathObject {
         return T.init(path)
     }
 
-    public class func join<T: PathLike>(_ basePath: T, _ toJoinedPaths: T...) -> T {
+    public class func join<T: PathLike>(_ basePath: T, _ toJoinedPaths: T...)
+        -> T
+    {
         return join(basePath, toJoinedPaths)
     }
 
@@ -101,8 +103,7 @@ public class Path: PathObject {
     }
 
     // nothing to do with posixpath
-    public class func splitdrive<T: PathLike>(_ path: T) -> (head: T, tail: T)
-    {
+    public class func splitdrive<T: PathLike>(_ path: T) -> (head: T, tail: T) {
         return (type(of: path).init(""), path)
     }
 
@@ -149,7 +150,9 @@ public class Path: PathObject {
                     || paths.allSatisfy({ !$0.path.hasPrefix(sep) }))
         else { return T.init("") }
         var splitPaths = paths.map { $0.path.split(separator: sep.first!) }
-        splitPaths = splitPaths.map { $0.filter { $0.path != "" && $0.path != curdir } }
+        splitPaths = splitPaths.map {
+            $0.filter { $0.path != "" && $0.path != curdir }
+        }
         let (s1, s2) = splitPaths.minmax()!
         let pre = paths[0].path.hasPrefix(sep) ? sep : ""
         for i in 0..<s1.count {
@@ -175,99 +178,100 @@ public class Path: PathObject {
         )
     }
 
-    public class func commonprefix(_ paths: [String]) -> String {
-        guard !paths.isEmpty else { return "" }
+    public class func commonprefix<T: PathLike>(_ paths: [T]) -> T {
+        guard !paths.isEmpty else { return T.init("") }
 
-        let (minP, maxP) = paths.minmax()!
+        let (minP, maxP) = (paths.map { $0.path }).minmax()!
 
         var idxMin = minP.startIndex
         var idxMax = maxP.startIndex
         while idxMin != minP.endIndex {
             if minP[idxMin] != maxP[idxMax] {
-                return String(minP[..<idxMin])
+                return T.init(String(minP[..<idxMin]))
             }
             idxMin = minP.index(after: idxMin)
             idxMax = maxP.index(after: idxMax)
         }
-        return minP
+        return T.init(minP)
     }
 
-    public class func commonprefix(_ paths: String...) -> String {
+    public class func commonprefix<T: PathLike>(_ paths: T...) -> T {
         return commonprefix(paths)
     }
 
-
-    public class func abspath(_ path: String) -> String {
-        var p = path
-        if !isabs(path) {
+    public class func abspath<T: PathLike>(_ path: T) -> T {
+        var p = path.path
+        if !isabs(path.path) {
             let cwd = OS.getcwd()
-            p = join(cwd, path)
+            p = join(cwd, path.path)
         }
-        return normpath(p)
+        return T.init(normpath(p))
     }
 
-    public class func realpath(_ filename: String) -> String {
+    public class func realpath<T: PathLike>(_ path: T) -> T {
         var seen: [String: String] = [:]
-        let (path, _) = _joinrealpath("", filename, &seen)
+        let (path, _) = _joinrealpath(T.init(""), path, &seen)
         return abspath(path)
     }
 }
 
 extension Path {
 
-    public class func expanduser(_ path: String) -> String {
-        guard path.hasPrefix(tilde) else { return path }
+    public class func expanduser<T: PathLike>(_ path: T) -> T {
+        let pathStr = path.path
+        guard pathStr.hasPrefix(tilde) else { return path }
 
-        let idxAfterTilde = path.index(after: path.startIndex)
-        let idx = path.firstIndex(where: { $0 == sep.first }) ?? path.endIndex
+        let idxAfterTilde = pathStr.index(after: pathStr.startIndex)
+        let idx =
+            pathStr.firstIndex(where: { $0 == sep.first }) ?? pathStr.endIndex
         // ~ and ~user
-        let user = String(path[idxAfterTilde..<idx])
+        let user = String(pathStr[idxAfterTilde..<idx])
 
         guard var userhome = OS.home(user) else { return path }
         // remove tailed '/'
         userhome.rstrip([sep.first!])
-        userhome += path[idx...]
-        return userhome == "" ? "/" : userhome
+        userhome += pathStr[idx...]
+        return T.init(userhome == "" ? "/" : userhome)
     }
 }
 
 extension Path {
 
     // Test whether a path is a symbolic link
-    public class func islink(_ path: String) -> Bool {
+    public class func islink<T: PathLike>(_ path: T) -> Bool {
         return (try? OS.lstat(path))?.islink ?? false
     }
 
     // Test whether a path exists. Returns True for broken symbolic links
-    public class func lexists(_ path: String) -> Bool {
+    public class func lexists<T: PathLike>(_ path: T) -> Bool {
         return islink(path) || exists(path)
     }
 
     // Test whether a path exists. Returns False for broken symbolic links
-    public class func exists(_ path: String) -> Bool {
+    public class func exists<T: PathLike>(_ path: T) -> Bool {
         return (try? OS.stat(path))?.exist ?? false
     }
 
     // This follows symbolic links, so both islink() and isfile() can be true
     // for the same path on systems that support symlinks
-    public class func isfile(_ path: String) -> Bool {
+    public class func isfile<T: PathLike>(_ path: T) -> Bool {
         return (try? OS.stat(path))?.isfile ?? false
 
     }
 
     // This follows symbolic links, so both islink() and isdir() can be true
     // for the same path on systems that support symlinks
-    public class func isdir(_ path: String) -> Bool {
+    public class func isdir<T: PathLike>(_ path: T) -> Bool {
         return (try? OS.stat(path))?.isdir ?? false
     }
 
-    public class func ismount(_ path: String) -> Bool {
+    public class func ismount<T: PathLike>(_ path: T) -> Bool {
         // s1 must not be link
         if islink(path) {
             return false
         }
-        if let s1 = try? OS.lstat(path) {
-            let parent = realpath(join(path, pardir))
+        if let s1 = try? OS.lstat(path.path) {
+            let parent = realpath(join(path.path, pardir))
             if let s2 = try? OS.lstat(parent) {
                 return s1 == s2
             }
@@ -275,39 +279,39 @@ extension Path {
         return false
     }
 
-    public class func getsize(_ filename: String) -> Int? {
+    public class func getsize<T: PathLike>(_ filename: T) -> Int? {
         return (try? OS.stat(filename))?.st_size
     }
 
-    public class func getmtime(_ filename: String) -> Double? {
+    public class func getmtime<T: PathLike>(_ filename: T) -> Double? {
         return (try? OS.stat(filename))?.st_mtime
     }
 
-    public class func getctime(_ filename: String) -> Double? {
+    public class func getctime<T: PathLike>(_ filename: T) -> Double? {
         return (try? OS.stat(filename))?.st_ctime
     }
 
-    public class func getatime(_ filename: String) -> Double? {
+    public class func getatime<T: PathLike>(_ filename: T) -> Double? {
         return (try? OS.stat(filename))?.st_atime
     }
 
-    public class func isReadable(_ filename: String) -> Bool {
-        return Path.fileManager.isReadableFile(atPath: filename)
+    public class func isReadable<T: PathLike>(_ filename: T) -> Bool {
+        return Path.fileManager.isReadableFile(atPath: filename.path)
     }
 
-    public class func isWritable(_ filename: String) -> Bool {
-        return Path.fileManager.isWritableFile(atPath: filename)
+    public class func isWritable<T: PathLike>(_ filename: T) -> Bool {
+        return Path.fileManager.isWritableFile(atPath: filename.path)
     }
 
-    public class func isExecutable(_ filename: String) -> Bool {
-        return Path.fileManager.isExecutableFile(atPath: filename)
+    public class func isExecutable<T: PathLike>(_ filename: T) -> Bool {
+        return Path.fileManager.isExecutableFile(atPath: filename.path)
     }
 
-    public class func isDeletable(_ filename: String) -> Bool {
-        return Path.fileManager.isDeletableFile(atPath: filename)
+    public class func isDeletable<T: PathLike>(_ filename: T) -> Bool {
+        return Path.fileManager.isDeletableFile(atPath: filename.path)
     }
 
-    public class func samefile(_ file1: String, _ file2: String) -> Bool {
+    public class func samefile<T: PathLike>(_ file1: T, _ file2: T) -> Bool {
         if let stat1 = try? OS.stat(file1), let stat2 = try? OS.stat(file2) {
             return stat1 == stat2
         }
@@ -405,21 +409,27 @@ extension Path {
             sepIndexValid = false
         }
         if let alt = altsep {
-            if let pos = pathStr[sepIndex...].lastIndex(where: { $0 == alt.first })
-            {
+            if let pos = pathStr[sepIndex...].lastIndex(where: {
+                $0 == alt.first
+            }) {
                 sepIndex = pos
                 sepIndexValid = true
             }
         }
 
-        if let pos = pathStr[sepIndex...].lastIndex(where: { $0 == extsep.first })
-        {
+        if let pos = pathStr[sepIndex...].lastIndex(where: {
+            $0 == extsep.first
+        }) {
             // skip all leading dots
             var filenameIndex =
-                sepIndexValid ? pathStr.index(after: sepIndex) : pathStr.startIndex
+                sepIndexValid
+                ? pathStr.index(after: sepIndex) : pathStr.startIndex
             while filenameIndex != pos {
                 if pathStr[filenameIndex] != extsep.first {
-                    return (T.init(String(pathStr[..<pos])), T.init(String(pathStr[pos...])))
+                    return (
+                        T.init(String(pathStr[..<pos])),
+                        T.init(String(pathStr[pos...]))
+                    )
                 }
                 filenameIndex = pathStr.index(after: filenameIndex)
             }
@@ -474,62 +484,43 @@ extension Path {
 
 extension Path {
 
-    public func join(_ toJoinedPaths: [String]) -> Path {
-        let newPath = cls.join(path, toJoinedPaths)
+    public func join<T: PathLike>(_ toJoinedPaths: [T]) -> Path {
+        let newPath = cls.join(T.init(path), toJoinedPaths)
         // return a new object
-        return cls.init(newPath)
+        return cls.init(newPath.path)
     }
 
-    public func join(_ toJoinedPaths: String...) -> Path {
+    public func join<T: PathLike>(_ toJoinedPaths: T...) -> Path {
         return join(toJoinedPaths)
     }
 
-    public func join(_ toJoinedPaths: [Path]) -> Path {
-        return join(toJoinedPaths.map { $0.path })
+    public func commonpath<T: PathLike>(_ paths: [T]) -> Path {
+        return cls.init(
+            cls.commonpath(cls.commonpath(paths), T.init(path)).path
+        )
     }
 
-    public func join(_ toJoinedPaths: Path...) -> Path {
-        return join(toJoinedPaths.map { $0.path })
-    }
-
-    public func commonpath(_ paths: [String]) -> Path {
-        return cls.init(cls.commonpath(cls.commonpath(paths), path))
-    }
-
-    public func commonpath(_ paths: String...) -> Path {
+    public func commonpath<T: PathLike>(_ paths: T...) -> Path {
         return commonpath(paths)
     }
 
-    public func commonpath(_ paths: Path...) -> Path {
-        return commonpath(paths.map { $0.path })
+    public func commonprefix<T: PathLike>(_ paths: [T]) -> Path {
+        return cls.init(
+            cls.commonprefix(cls.commonprefix(paths), T.init(path)).path
+        )
     }
 
-    public func commonpath(_ paths: [Path]) -> Path {
-        return commonpath(paths.map { $0.path })
-    }
-
-    public func commonprefix(_ paths: [String]) -> Path {
-        return cls.init(cls.commonprefix(cls.commonprefix(paths), path))
-    }
-
-    public func commonprefix(_ paths: String...) -> Path {
+    public func commonprefix<T: PathLike>(_ paths: T...) -> Path {
         return commonprefix(paths)
     }
 
-    public func commonprefix(_ paths: Path...) -> Path {
-        return commonprefix(paths.map { $0.path })
+    public func samefile<T: PathLike>(_ path: T) -> Bool {
+        return cls.samefile(self.path, path.path)
     }
-
-    public func commonprefix(_ paths: [Path]) -> Path {
-        return commonprefix(paths.map { $0.path })
-    }
-
-    public func samefile(_ path: Path) -> Bool { return samefile(path.path) }
-    public func samefile(_ path: String) -> Bool { return cls.samefile(self.path, path) }
 }
 
 extension Path: Equatable {
-    public static func ==(lhs: Path, rhs: Path) -> Bool {
+    public static func == (lhs: Path, rhs: Path) -> Bool {
         return lhs.path == rhs.path
     }
 }
@@ -541,6 +532,7 @@ extension Path: Comparable {
 }
 
 extension Path: CustomStringConvertible {
-    public var description: String { return "\(String(describing: self))(\"\(path)\")"}
+    public var description: String {
+        return "\(String(describing: self))(\"\(path)\")"
+    }
 }
-

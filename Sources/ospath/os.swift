@@ -2,75 +2,45 @@ import Foundation
 
 public class OS {
 
-    public static func symlink(_ dst: String, _ at: String) throws {
+    public static func symlink<T: PathLike>(_ dst: T, _ at: T) throws {
         try Path.fileManager.createSymbolicLink(
-            atPath: at,
-            withDestinationPath: dst
+            atPath: at.path,
+            withDestinationPath: dst.path
         )
     }
 
-    public static func symlink(_ dst: URL, _ at: URL) throws {
-        try Path.fileManager.createSymbolicLink(at: at, withDestinationURL: dst)
+    public static func link<T: PathLike>(_ at: T, _ dst: T) throws {
+        try Path.fileManager.linkItem(atPath: at.path, toPath: dst.path)
     }
 
-    public static func link(_ at: String, _ dst: String) throws {
-        try Path.fileManager.linkItem(atPath: at, toPath: dst)
+    public static func readlink<T: PathLike>(_ link: T) -> T {
+        return T.init(
+            (try? Path.fileManager.destinationOfSymbolicLink(atPath: link.path))
+                ?? ""
+        )
     }
 
-    public static func link(_ at: URL, _ dst: URL) throws {
-        try Path.fileManager.linkItem(at: at, to: dst)
+    public static func remove<T: PathLike>(_ file: T) throws {
+        try Path.fileManager.removeItem(atPath: file.path)
     }
 
-    public static func readlink(_ link: String) -> String {
-        return (try? Path.fileManager.destinationOfSymbolicLink(atPath: link))
-            ?? ""
+    public static func copy<T: PathLike>(_ file: T, _ dst: T) throws {
+        try Path.fileManager.copyItem(atPath: file.path, toPath: dst.path)
     }
 
-    public static func remove(_ file: String) throws {
-        try Path.fileManager.removeItem(atPath: file)
+    public static func move<T: PathLike>(_ file: T, _ dst: T) throws {
+        try Path.fileManager.moveItem(atPath: file.path, toPath: dst.path)
     }
 
-    public static func remove(_ file: URL) throws {
-        try Path.fileManager.removeItem(at: file)
+    public static func open<T: PathLike>(_ file: T) -> Bool {
+        return Path.fileManager.createFile(atPath: file.path, contents: nil)
     }
 
-    public static func copy(_ file: String, _ dst: String) throws {
-        try Path.fileManager.copyItem(atPath: file, toPath: dst)
-    }
-
-    public static func copy(_ file: URL, _ dst: URL) throws {
-        try Path.fileManager.copyItem(at: file, to: dst)
-    }
-
-    public static func move(_ file: String, _ dst: String) throws {
-        try Path.fileManager.moveItem(atPath: file, toPath: dst)
-    }
-
-    public static func move(_ file: URL, _ dst: URL) throws {
-        try Path.fileManager.moveItem(at: file, to: dst)
-    }
-
-    public static func open(_ file: String) -> Bool {
-        return Path.fileManager.createFile(atPath: file, contents: nil)
-    }
-
-    public static func mkdir(_ dir: String) throws {
+    public static func mkdir<T: PathLike>(_ dir: T) throws {
         do {
             try Path.fileManager.createDirectory(
-                atPath: dir,
+                atPath: dir.path,
                 withIntermediateDirectories: true
-            )
-        }
-        catch {
-            throw WriteError(path: dir, reason: .folderCreationFailed(error))
-        }
-    }
-
-    public static func mkdir(_ dir: URL) throws {
-        do {
-            try Path.fileManager.createDirectory(
-                at: dir,
-                withIntermediateDirectories: false
             )
         }
         catch {
@@ -81,22 +51,10 @@ public class OS {
         }
     }
 
-    public static func makedirs(_ dir: String) throws {
+    public static func makedirs<T: PathLike>(_ dir: T) throws {
         do {
             try Path.fileManager.createDirectory(
-                atPath: dir,
-                withIntermediateDirectories: true
-            )
-        }
-        catch {
-            throw WriteError(path: dir, reason: .folderCreationFailed(error))
-        }
-    }
-
-    public static func makedirs(_ dir: URL) throws {
-        do {
-            try Path.fileManager.createDirectory(
-                at: dir,
+                atPath: dir.path,
                 withIntermediateDirectories: true
             )
         }
@@ -111,21 +69,24 @@ public class OS {
 
 extension OS {
 
-    static var environ = ProcessInfo.processInfo.environment
+    public static var environ = ProcessInfo.processInfo.environment
 
     // Get the status of a file, always follow links
-    public static func stat(_ path: String, _ followSymlinks: Bool = true)
+    public static func stat<T: PathLike>(
+        _ path: T,
+        _ followSymlinks: Bool = true
+    )
         throws -> StatResult
     {
-        if followSymlinks && OSPath.islink(path) {
-            return StatResult(at: OS.readlink(path))
+        if followSymlinks && OSPath.islink(path.path) {
+            return StatResult(at: OS.readlink(path.path))
         }
-        return StatResult(at: path)
+        return StatResult(at: path.path)
     }
 
     // Get the status of a file, never follow link
-    public static func lstat(_ path: String) throws -> StatResult {
-        return try OS.stat(path, false)
+    public static func lstat<T: PathLike>(_ path: T) throws -> StatResult {
+        return try OS.stat(path.path, false)
     }
 }
 

@@ -26,12 +26,16 @@ public class NTPath: Path {
     }
 
     override public class func normcase<T: PathLike>(_ path: T) -> T {
-        return type(of: path).init(path.path.replacingOccurrences(of: altsep!, with: sep))
+        return type(of: path).init(
+            path.path.replacingOccurrences(of: altsep!, with: sep)
+        )
     }
 
     // check if path is absolute
     override public class func isabs<T: PathLike>(_ path: T) -> Bool {
-        guard !normcase(path).path.hasPrefix(specialPrefixes[0]) else { return true }
+        guard !normcase(path).path.hasPrefix(specialPrefixes[0]) else {
+            return true
+        }
         guard let c = splitdrive(path).tail.path.first, seps.contains(c) else {
             return false
         }
@@ -69,7 +73,8 @@ public class NTPath: Path {
             path += pPath.path
         }
         let tp = type(of: basePath)
-        if let c = path.first, let d = drive.path.last, !seps.contains(c) && d != ":"
+        if let c = path.first, let d = drive.path.last,
+            !seps.contains(c) && d != ":"
         {
             return tp.init(drive.path + sep + path)
         }
@@ -84,7 +89,9 @@ public class NTPath: Path {
         let (d, p) = splitdrive(path)
         let pathStr = p.path
         var i = pathStr.endIndex
-        while i != pathStr.startIndex && !seps.contains(pathStr[pathStr.index(before: i)]) {
+        while i != pathStr.startIndex
+            && !seps.contains(pathStr[pathStr.index(before: i)])
+        {
             i = pathStr.index(before: i)
         }
         var (head, tail) = (pathStr[..<i], pathStr[i...])
@@ -115,7 +122,10 @@ public class NTPath: Path {
                     if index2 == normp.index(after: index) {
                         return (tp.init(""), path)
                     }
-                    return (tp.init(String(path.path[..<index2])), tp.init(String(path.path[index2...])))
+                    return (
+                        tp.init(String(path.path[..<index2])),
+                        tp.init(String(path.path[index2...]))
+                    )
                 }
                 else {
                     return (path, tp.init(""))
@@ -128,7 +138,10 @@ public class NTPath: Path {
 
         if normp[normp.index(after: normp.startIndex)] == ":" {
             let index = normp.index(normp.startIndex, offsetBy: 2)
-            return (tp.init(String(path.path[..<index])), tp.init(String(path.path[index...])))
+            return (
+                tp.init(String(path.path[..<index])),
+                tp.init(String(path.path[index...]))
+            )
         }
         return (tp.init(""), path)
     }
@@ -184,7 +197,9 @@ public class NTPath: Path {
         guard !paths.isEmpty else { return T.init("") }
         guard paths.count != 1 else { return paths[0] }
 
-        let driveSplit = paths.map { splitdrive(normpath($0.path).lowercased()) }
+        let driveSplit = paths.map {
+            splitdrive(normpath($0.path).lowercased())
+        }
         var splitPaths = driveSplit.map { $0.1.split(separator: sep.first!) }
 
         guard
