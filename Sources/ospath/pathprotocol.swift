@@ -1,3 +1,5 @@
+
+import Foundation
 // everything that has a instance member named path is a PathLike object
 
 public protocol PathLike {
@@ -16,6 +18,12 @@ extension String.SubSequence: PathLike {
     public var path: String { return String(self) }
     public init(_ path: SubSequence) {
         self = path
+    }
+}
+
+extension URL: PathLike {
+    public init(_ path: String) {
+        self.init(fileURLWithPath: path)
     }
 }
 
