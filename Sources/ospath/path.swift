@@ -162,11 +162,11 @@ public class Path: PathObject {
         return T.init(pre + common.joined(separator: sep))
     }
 
-    public class func commonpath(_ paths: String...) -> String {
+    public class func commonpath<T: PathLike>(_ paths: T...) -> T {
         return commonpath(paths)
     }
 
-    public class func splitext(_ path: String) -> (head: String, tail: String) {
+    public class func splitext<T: PathLike>(_ path: T) -> (head: T, tail: T) {
         return _splitext(
             path: path,
             sep: sep,
@@ -317,15 +317,15 @@ extension Path {
 
 extension Path {
 
-    static func _joinrealpath(
-        _ path: String,
-        _ rest: String,
+    static func _joinrealpath<T: PathLike>(
+        _ path: T,
+        _ rest: T,
         _ seen: inout [String: String]
     ) -> (
-        String, Bool
+        T, Bool
     ) {
-        var newPath = path
-        var r = rest
+        var newPath = path.path
+        var r = rest.path
         if isabs(rest) {
             r = String(r[r.index(after: r.startIndex)...])
             newPath = sep
@@ -366,19 +366,19 @@ extension Path {
 
             if let v = seen[p] {
                 newPath = v
-                return (join(newPath, r), false)
+                return (T.init(join(newPath, r)), false)
             }
 
             seen.removeValue(forKey: p)
             var ok: Bool
             (newPath, ok) = _joinrealpath(newPath, OS.readlink(p), &seen)
             if !ok {
-                return (join(newPath, rest), false)
+                return (T.init(join(newPath, rest.path)), false)
             }
 
             seen[p] = newPath
         }
-        return (newPath, true)
+        return (T.init(newPath), true)
     }
 
     // if given string is not found, return startIndex
@@ -386,44 +386,45 @@ extension Path {
     // The extension is everything starting at the last dot in the last
     // pathname component; the root is everything before that.
     // It is always true that root + ext == p.
-    static func _splitext(
-        path: String,
+    static func _splitext<T: PathLike>(
+        path: T,
         sep: String,
         altsep: String?,
         extsep: String
     ) -> (
-        String, String
+        T, T
     ) {
         var sepIndex: String.Index
         var sepIndexValid = true
-        if let pos = path.lastIndex(where: { $0 == sep.first }) {
+        let pathStr = path.path
+        if let pos = pathStr.lastIndex(where: { $0 == sep.first }) {
             sepIndex = pos
         }
         else {
-            sepIndex = path.startIndex
+            sepIndex = pathStr.startIndex
             sepIndexValid = false
         }
         if let alt = altsep {
-            if let pos = path[sepIndex...].lastIndex(where: { $0 == alt.first })
+            if let pos = pathStr[sepIndex...].lastIndex(where: { $0 == alt.first })
             {
                 sepIndex = pos
                 sepIndexValid = true
             }
         }
 
-        if let pos = path[sepIndex...].lastIndex(where: { $0 == extsep.first })
+        if let pos = pathStr[sepIndex...].lastIndex(where: { $0 == extsep.first })
         {
             // skip all leading dots
             var filenameIndex =
-                sepIndexValid ? path.index(after: sepIndex) : path.startIndex
+                sepIndexValid ? pathStr.index(after: sepIndex) : pathStr.startIndex
             while filenameIndex != pos {
-                if path[filenameIndex] != extsep.first {
-                    return (String(path[..<pos]), String(path[pos...]))
+                if pathStr[filenameIndex] != extsep.first {
+                    return (T.init(String(pathStr[..<pos])), T.init(String(pathStr[pos...])))
                 }
-                filenameIndex = path.index(after: filenameIndex)
+                filenameIndex = pathStr.index(after: filenameIndex)
             }
         }
-        return (path, "")
+        return (path, T.init(""))
     }
 }
 
