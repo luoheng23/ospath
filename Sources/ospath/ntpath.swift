@@ -72,13 +72,12 @@ public class NTPath: Path {
             }
             path += pPath.path
         }
-        let tp = type(of: basePath)
         if let c = path.first, let d = drive.path.last,
             !seps.contains(c) && d != ":"
         {
-            return tp.init(drive.path + sep + path)
+            return T.init(drive.path + sep + path)
         }
-        return tp.init(drive.path + path)
+        return T.init(drive.path + path)
     }
 
     // split a path in head (everything up to the last '/') and tail (the rest)
@@ -99,15 +98,13 @@ public class NTPath: Path {
         if !head.allSatisfy({ seps.contains($0) }) {
             head.rstrip(seps)
         }
-        let tp = type(of: path)
-        return (tp.init(String(d.path + head)), tp.init(String(tail)))
+        return (T.init(String(d.path + head)), T.init(String(tail)))
     }
 
     override public class func splitdrive<T: PathLike>(_ path: T) -> (
         head: T, tail: T
     ) {
-        let tp = type(of: path)
-        guard path.path.count >= 2 else { return (tp.init(""), path) }
+        guard path.path.count >= 2 else { return (T.init(""), path) }
 
         let normp = normcase(path).path
         if normp.hasPrefix(sep + sep) && !normp.hasPrefix(sep + sep + sep) {
@@ -120,36 +117,36 @@ public class NTPath: Path {
                     where: { $0 == sep.first })
                 {
                     if index2 == normp.index(after: index) {
-                        return (tp.init(""), path)
+                        return (T.init(""), path)
                     }
                     return (
-                        tp.init(String(path.path[..<index2])),
-                        tp.init(String(path.path[index2...]))
+                        T.init(String(path.path[..<index2])),
+                        T.init(String(path.path[index2...]))
                     )
                 }
                 else {
-                    return (path, tp.init(""))
+                    return (path, T.init(""))
                 }
             }
             else {
-                return (tp.init(""), path)
+                return (T.init(""), path)
             }
         }
 
         if normp[normp.index(after: normp.startIndex)] == ":" {
             let index = normp.index(normp.startIndex, offsetBy: 2)
             return (
-                tp.init(String(path.path[..<index])),
-                tp.init(String(path.path[index...]))
+                T.init(String(path.path[..<index])),
+                T.init(String(path.path[index...]))
             )
         }
-        return (tp.init(""), path)
+        return (T.init(""), path)
     }
 
     override public class func normpath<T: PathLike>(_ path: T) -> T {
-        let tp = type(of: path)
+        let T = type(of: path)
         let pathStr = path.path
-        guard !pathStr.isEmpty else { return tp.init(curdir) }
+        guard !pathStr.isEmpty else { return T.init(curdir) }
         guard
             !pathStr.hasPrefix(specialPrefixes[0])
                 && !pathStr.hasPrefix(specialPrefixes[1])
@@ -190,7 +187,7 @@ public class NTPath: Path {
             comps.append(curdir[...])
         }
 
-        return tp.init(drive + comps.joined(separator: sep))
+        return T.init(drive + comps.joined(separator: sep))
     }
 
     override public class func commonpath<T: PathLike>(_ paths: [T]) -> T {

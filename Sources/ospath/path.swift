@@ -90,8 +90,7 @@ public class Path: PathObject {
             // remove tailed '/'
             head.rstrip([sep.first!])
         }
-        let tp = type(of: path)
-        return (tp.init(String(head)), tp.init(String(tail)))
+        return (T.init(String(head)), T.init(String(tail)))
     }
 
     public class func basename<T: PathLike>(_ path: T) -> T {
@@ -108,9 +107,8 @@ public class Path: PathObject {
     }
 
     public class func normpath<T: PathLike>(_ path: T) -> T {
-        let tp = type(of: path)
         let pathStr = path.path
-        guard !pathStr.isEmpty else { return tp.init(curdir) }
+        guard !pathStr.isEmpty else { return T.init(curdir) }
 
         var slashes = 0
         if pathStr.hasPrefix(sep) {
@@ -139,8 +137,8 @@ public class Path: PathObject {
         comps = newComps
         var newPath = comps.joined(separator: sep)
         newPath = String(repeating: sep, count: slashes) + newPath
-        guard !newPath.isEmpty else { return tp.init(curdir) }
-        return tp.init(newPath)
+        guard !newPath.isEmpty else { return T.init(curdir) }
+        return T.init(newPath)
     }
 
     public class func commonpath<T: PathLike>(_ paths: [T]) -> T {
