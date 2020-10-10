@@ -16,9 +16,7 @@ extension String: PathLike {
 
 extension String.SubSequence: PathLike {
     public var path: String { return String(self) }
-    public init(_ path: SubSequence) {
-        self = path
-    }
+    public init(_ path: String) { self.init() }
 }
 
 extension URL: PathLike {
