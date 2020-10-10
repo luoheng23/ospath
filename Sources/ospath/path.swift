@@ -521,7 +521,8 @@ extension Path {
 
 extension Path: Equatable {
     public static func == (lhs: Path, rhs: Path) -> Bool {
-        return lhs.path == rhs.path
+        // make sure PosixPath doesn't equal to NTPath
+        return type(of: lhs) == type(of: rhs) && lhs.path == rhs.path
     }
 }
 
