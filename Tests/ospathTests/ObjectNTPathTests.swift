@@ -129,7 +129,9 @@ final class ObjectNTPathTests: XCTestCase {
     }
 
     func testSplit() {
-        XCTAssert(NTPath("c:\\foo\\ba").split == (NTPath("c:\\foo"), NTPath("ba")))
+        XCTAssert(
+            NTPath("c:\\foo\\ba").split == (NTPath("c:\\foo"), NTPath("ba"))
+        )
         XCTAssert(
             NTPath("\\\\conky\\mountpoint\\foo\\ba").split == (
                 NTPath("\\\\conky\\mountpoint\\foo"), NTPath("ba")
@@ -145,26 +147,58 @@ final class ObjectNTPathTests: XCTestCase {
 
         XCTAssert(NTPath("c:/").split == (NTPath("c:/"), NTPath("")))
         XCTAssert(
-            NTPath("//conky/mountpoint/").split == (NTPath("//conky/mountpoint/"), NTPath(""))
+            NTPath("//conky/mountpoint/").split == (
+                NTPath("//conky/mountpoint/"), NTPath("")
+            )
         )
     }
 
     func testSplitext() {
         XCTAssert(NTPath("foo.ext").splitext == (NTPath("foo"), NTPath(".ext")))
-        XCTAssert(NTPath("/foo/foo.ext").splitext == (NTPath("/foo/foo"), NTPath(".ext")))
+        XCTAssert(
+            NTPath("/foo/foo.ext").splitext == (
+                NTPath("/foo/foo"), NTPath(".ext")
+            )
+        )
         XCTAssert(NTPath(".ext").splitext == (NTPath(".ext"), NTPath("")))
-        XCTAssert(NTPath("\\foo.ext\\foo").splitext == (NTPath("\\foo.ext\\foo"), NTPath("")))
-        XCTAssert(NTPath("foo.ext\\").splitext == (NTPath("foo.ext\\"), NTPath("")))
+        XCTAssert(
+            NTPath("\\foo.ext\\foo").splitext == (
+                NTPath("\\foo.ext\\foo"), NTPath("")
+            )
+        )
+        XCTAssert(
+            NTPath("foo.ext\\").splitext == (NTPath("foo.ext\\"), NTPath(""))
+        )
         XCTAssert(NTPath("").splitext == (NTPath(""), NTPath("")))
-        XCTAssert(NTPath("foo.bar.ext").splitext == (NTPath("foo.bar"), NTPath(".ext")))
-        XCTAssert(NTPath("xx/foo.bar.ext").splitext == (NTPath("xx/foo.bar"), NTPath(".ext")))
-        XCTAssert(NTPath("xx\\foo.bar.ext").splitext == (NTPath("xx\\foo.bar"), NTPath(".ext")))
-        XCTAssert(NTPath("c:a/b\\c.d").splitext == (NTPath("c:a/b\\c"), NTPath(".d")))
+        XCTAssert(
+            NTPath("foo.bar.ext").splitext == (
+                NTPath("foo.bar"), NTPath(".ext")
+            )
+        )
+        XCTAssert(
+            NTPath("xx/foo.bar.ext").splitext == (
+                NTPath("xx/foo.bar"), NTPath(".ext")
+            )
+        )
+        XCTAssert(
+            NTPath("xx\\foo.bar.ext").splitext == (
+                NTPath("xx\\foo.bar"), NTPath(".ext")
+            )
+        )
+        XCTAssert(
+            NTPath("c:a/b\\c.d").splitext == (NTPath("c:a/b\\c"), NTPath(".d"))
+        )
     }
 
     func testSplitdrive() {
-        XCTAssert(NTPath("c:\\foo\\ba").splitdrive == (NTPath("c:"), NTPath("\\foo\\ba")))
-        XCTAssert(NTPath("c:/foo/ba").splitdrive == (NTPath("c:"), NTPath("/foo/ba")))
+        XCTAssert(
+            NTPath("c:\\foo\\ba").splitdrive == (
+                NTPath("c:"), NTPath("\\foo\\ba")
+            )
+        )
+        XCTAssert(
+            NTPath("c:/foo/ba").splitdrive == (NTPath("c:"), NTPath("/foo/ba"))
+        )
         XCTAssert(
             NTPath("\\\\conky\\mountpoint\\foo\\ba").splitdrive == (
                 NTPath("\\\\conky\\mountpoint"), NTPath("\\foo\\ba")
