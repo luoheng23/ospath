@@ -1,17 +1,18 @@
 import Foundation
 
-public class Path {
+public class Path: PathObject {
     
     public var path: String
     public lazy var cls = type(of: self)
 
-    required init(_ path: String = "") {
+    public required init(_ path: String = "") {
         self.path = path
     }
-    static let curdir = "."
-    static let pardir = ".."
-    static let extsep = "."
-    static let tilde = "~"
+
+    public static let curdir = "."
+    public static let pardir = ".."
+    public static let extsep = "."
+    public static let tilde = "~"
 
     static let fileManager = FileManager.default
 
@@ -36,21 +37,22 @@ public class Path {
     }
 
     // nothing to do with posixpath
-    public class func normcase(_ path: String) -> String {
+    public class func normcase<T: PathLike>(_ path: T) -> T {
         return path
     }
 
     // check if path is absolute
-    public class func isabs(_ path: String) -> Bool {
-        return path.hasPrefix(String(sep))
+    public class func isabs<T: PathLike>(_ path: T) -> Bool {
+        return path.path.hasPrefix(String(sep))
     }
 
     // join pathnames
-    public class func join(_ basePath: String, _ toJoinedPaths: [String])
-        -> String
+    public class func join<T: PathLike>(_ basePath: T, _ toJoinedPaths: [T])
+        -> T
     {
-        var path = basePath
+        var path = basePath.path
         for p in toJoinedPaths {
+            let p = p.path
             if isabs(p) {
                 // the path is an absolute path
                 path = p
@@ -62,59 +64,63 @@ public class Path {
                 path += sep + p
             }
         }
-        return path
+        return T.init(path)
     }
 
-    public class func join(_ basePath: String, _ toJoinedPaths: String...) -> String {
+    public class func join<T: PathLike>(_ basePath: T, _ toJoinedPaths: T...) -> T {
         return join(basePath, toJoinedPaths)
     }
 
     // split a path in head (everything up to the last '/') and tail (the rest)
     // if head is like usr////, remove tailed '/'
-    public class func split(_ path: String) -> (head: String, tail: String) {
+    public class func split<T: PathLike>(_ path: T) -> (head: T, tail: T) {
         var lastIndex: String.Index
-        if let pos = path.lastIndex(where: { $0 == sep.first }) {
-            lastIndex = path.index(after: pos)
+        let pathStr = path.path
+        if let pos = pathStr.lastIndex(where: { $0 == sep.first }) {
+            lastIndex = pathStr.index(after: pos)
         }
         else {
-            lastIndex = path.startIndex
+            lastIndex = pathStr.startIndex
         }
 
-        var (head, tail) = (path[..<lastIndex], path[lastIndex...])
+        var (head, tail) = (pathStr[..<lastIndex], pathStr[lastIndex...])
         if !head.allSatisfy({ $0 == sep.first }) {
             // remove tailed '/'
             head.rstrip([sep.first!])
         }
-        return (String(head), String(tail))
+        let tp = type(of: path)
+        return (tp.init(String(head)), tp.init(String(tail)))
     }
 
-    public class func basename(_ path: String) -> String {
+    public class func basename<T: PathLike>(_ path: T) -> T {
         return split(path).tail
     }
 
-    public class func dirname(_ path: String) -> String {
+    public class func dirname<T: PathLike>(_ path: T) -> T {
         return split(path).head
     }
 
     // nothing to do with posixpath
-    public class func splitdrive(_ path: String) -> (head: String, tail: String)
+    public class func splitdrive<T: PathLike>(_ path: T) -> (head: T, tail: T)
     {
-        return ("", path)
+        return (type(of: path).init(""), path)
     }
 
-    public class func normpath(_ path: String) -> String {
-        guard !path.isEmpty else { return curdir }
+    public class func normpath<T: PathLike>(_ path: T) -> T {
+        let tp = type(of: path)
+        let pathStr = path.path
+        guard !pathStr.isEmpty else { return tp.init(curdir) }
 
         var slashes = 0
-        if path.hasPrefix(sep) {
+        if pathStr.hasPrefix(sep) {
             slashes += 1
         }
-        if slashes == 1 && path.hasPrefix(sep + sep)
-            && !path.hasPrefix(sep + sep + sep)
+        if slashes == 1 && pathStr.hasPrefix(sep + sep)
+            && !pathStr.hasPrefix(sep + sep + sep)
         {
             slashes += 1
         }
-        var comps = path.split(separator: sep.first!)
+        var comps = pathStr.split(separator: sep.first!)
         var newComps = [Substring]()
         for comp in comps {
             if comp == "" || comp == curdir {
@@ -132,28 +138,28 @@ public class Path {
         comps = newComps
         var newPath = comps.joined(separator: sep)
         newPath = String(repeating: sep, count: slashes) + newPath
-        guard !newPath.isEmpty else { return curdir }
-        return newPath
+        guard !newPath.isEmpty else { return tp.init(curdir) }
+        return tp.init(newPath)
     }
 
-    public class func commonpath(_ paths: [String]) -> String {
+    public class func commonpath<T: PathLike>(_ paths: [T]) -> T {
         guard
             !paths.isEmpty
-                && (paths.allSatisfy({ $0.hasPrefix(sep) })
-                    || paths.allSatisfy({ !$0.hasPrefix(sep) }))
-        else { return "" }
-        var splitPaths = paths.map { $0.split(separator: sep.first!) }
-        splitPaths = splitPaths.map { $0.filter { $0 != "" && $0 != curdir } }
+                && (paths.allSatisfy({ $0.path.hasPrefix(sep) })
+                    || paths.allSatisfy({ !$0.path.hasPrefix(sep) }))
+        else { return T.init("") }
+        var splitPaths = paths.map { $0.path.split(separator: sep.first!) }
+        splitPaths = splitPaths.map { $0.filter { $0.path != "" && $0.path != curdir } }
         let (s1, s2) = splitPaths.minmax()!
-        let pre = paths[0].hasPrefix(sep) ? sep : ""
+        let pre = paths[0].path.hasPrefix(sep) ? sep : ""
         for i in 0..<s1.count {
             if s1[i] != s2[i] {
                 let common = s1[..<i]
-                return pre + common.joined(separator: sep)
+                return T.init(pre + common.joined(separator: sep))
             }
         }
         let common = s1
-        return pre + common.joined(separator: sep)
+        return T.init(pre + common.joined(separator: sep))
     }
 
     public class func commonpath(_ paths: String...) -> String {
@@ -530,24 +536,6 @@ extension Path: Equatable {
 extension Path: Comparable {
     public static func < (lhs: Path, rhs: Path) -> Bool {
         return lhs.path < rhs.path
-    }
-}
-
-extension Path {
-    public static func +(lhs: Path, rhs: Path) -> Path {
-        return lhs.join(rhs)
-    }
-
-    public static func +(lhs: Path, rhs: String) -> Path {
-        return lhs.join(rhs)
-    }
-
-    public static func += (lhs: inout Path, rhs: Path) {
-        lhs = lhs.join(rhs)
-    }
-
-    public static func += (lhs: inout Path, rhs: String) {
-        lhs = lhs.join(rhs)
     }
 }
 

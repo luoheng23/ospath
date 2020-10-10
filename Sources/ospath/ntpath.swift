@@ -25,39 +25,40 @@ public class NTPath: Path {
         return "nul"
     }
 
-    override public class func normcase(_ path: String) -> String {
-        return path.replacingOccurrences(of: altsep!, with: sep)
+    override public class func normcase<T: PathLike>(_ path: T) -> T {
+        return type(of: path).init(path.path.replacingOccurrences(of: altsep!, with: sep))
     }
 
     // check if path is absolute
-    override public class func isabs(_ path: String) -> Bool {
-        guard !normcase(path).hasPrefix(specialPrefixes[0]) else { return true }
-        guard let c = splitdrive(path).tail.first, seps.contains(c) else {
+    override public class func isabs<T: PathLike>(_ path: T) -> Bool {
+        guard !normcase(path).path.hasPrefix(specialPrefixes[0]) else { return true }
+        guard let c = splitdrive(path).tail.path.first, seps.contains(c) else {
             return false
         }
         return true
     }
 
     // join pathnames
-    override public class func join(
-        _ basePath: String,
-        _ toJoinedPaths: [String]
-    ) -> String {
-        var (drive, path) = splitdrive(basePath)
+    override public class func join<T: PathLike>(
+        _ basePath: T,
+        _ toJoinedPaths: [T]
+    ) -> T {
+        var (drive, p) = splitdrive(basePath)
+        var path = p.path
         for p in toJoinedPaths {
             let (pDrive, pPath) = splitdrive(p)
             // absolute path
-            if let c = pPath.first, seps.contains(c) {
-                if drive.isEmpty || !pDrive.isEmpty {
+            if let c = pPath.path.first, seps.contains(c) {
+                if drive.path.isEmpty || !pDrive.path.isEmpty {
                     drive = pDrive
                 }
-                path = pPath
+                path = pPath.path
                 continue
             }
-            else if !pDrive.isEmpty && pDrive != drive {
-                if pDrive.lowercased() != drive.lowercased() {
+            else if !pDrive.path.isEmpty && pDrive.path != drive.path {
+                if pDrive.path.lowercased() != drive.path.lowercased() {
                     drive = pDrive
-                    path = pPath
+                    path = pPath.path
                     continue
                 }
                 drive = pDrive
@@ -65,38 +66,43 @@ public class NTPath: Path {
             if let c = path.last, !seps.contains(c) {
                 path += sep
             }
-            path += pPath
+            path += pPath.path
         }
-        if let c = path.first, let d = drive.last, !seps.contains(c) && d != ":"
+        let tp = type(of: basePath)
+        if let c = path.first, let d = drive.path.last, !seps.contains(c) && d != ":"
         {
-            return drive + sep + path
+            return tp.init(drive.path + sep + path)
         }
-        return drive + path
+        return tp.init(drive.path + path)
     }
 
     // split a path in head (everything up to the last '/') and tail (the rest)
     // if head is like usr////, remove tailed '/'
-    override public class func split(_ path: String) -> (
-        head: String, tail: String
+    override public class func split<T: PathLike>(_ path: T) -> (
+        head: T, tail: T
     ) {
         let (d, p) = splitdrive(path)
-        var i = p.endIndex
-        while i != p.startIndex && !seps.contains(p[p.index(before: i)]) {
-            i = p.index(before: i)
+        let pathStr = p.path
+        var i = pathStr.endIndex
+        while i != pathStr.startIndex && !seps.contains(pathStr[pathStr.index(before: i)]) {
+            i = pathStr.index(before: i)
         }
-        var (head, tail) = (p[..<i], p[i...])
+        var (head, tail) = (pathStr[..<i], pathStr[i...])
 
         if !head.allSatisfy({ seps.contains($0) }) {
             head.rstrip(seps)
         }
-        return (String(d + head), String(tail))
+        let tp = type(of: path)
+        return (tp.init(String(d.path + head)), tp.init(String(tail)))
     }
 
-    override public class func splitdrive(_ path: String) -> (
-        head: String, tail: String
+    override public class func splitdrive<T: PathLike>(_ path: T) -> (
+        head: T, tail: T
     ) {
-        guard path.count >= 2 else { return ("", path) }
-        let normp = normcase(path)
+        let tp = type(of: path)
+        guard path.path.count >= 2 else { return (tp.init(""), path) }
+
+        let normp = normcase(path).path
         if normp.hasPrefix(sep + sep) && !normp.hasPrefix(sep + sep + sep) {
             if let index = normp[normp.index(normp.startIndex, offsetBy: 2)...]
                 .firstIndex(where: {
@@ -107,36 +113,38 @@ public class NTPath: Path {
                     where: { $0 == sep.first })
                 {
                     if index2 == normp.index(after: index) {
-                        return ("", path)
+                        return (tp.init(""), path)
                     }
-                    return (String(path[..<index2]), String(path[index2...]))
+                    return (tp.init(String(path.path[..<index2])), tp.init(String(path.path[index2...])))
                 }
                 else {
-                    return (path, "")
+                    return (path, tp.init(""))
                 }
             }
             else {
-                return ("", path)
+                return (tp.init(""), path)
             }
         }
 
         if normp[normp.index(after: normp.startIndex)] == ":" {
             let index = normp.index(normp.startIndex, offsetBy: 2)
-            return (String(path[..<index]), String(path[index...]))
+            return (tp.init(String(path.path[..<index])), tp.init(String(path.path[index...])))
         }
-        return ("", path)
+        return (tp.init(""), path)
     }
 
-    override public class func normpath(_ path: String) -> String {
-        guard !path.isEmpty else { return curdir }
+    override public class func normpath<T: PathLike>(_ path: T) -> T {
+        let tp = type(of: path)
+        let pathStr = path.path
+        guard !pathStr.isEmpty else { return tp.init(curdir) }
         guard
-            !path.hasPrefix(specialPrefixes[0])
-                && !path.hasPrefix(specialPrefixes[1])
+            !pathStr.hasPrefix(specialPrefixes[0])
+                && !pathStr.hasPrefix(specialPrefixes[1])
         else {
             return path
         }
 
-        var (drive, p) = splitdrive(normcase(path))
+        var (drive, p) = splitdrive(normcase(pathStr))
 
         if p.hasPrefix(sep) {
             drive += sep
@@ -169,34 +177,34 @@ public class NTPath: Path {
             comps.append(curdir[...])
         }
 
-        return drive + comps.joined(separator: sep)
+        return tp.init(drive + comps.joined(separator: sep))
     }
 
-    override public class func commonpath(_ paths: [String]) -> String {
-        guard !paths.isEmpty else { return "" }
+    override public class func commonpath<T: PathLike>(_ paths: [T]) -> T {
+        guard !paths.isEmpty else { return T.init("") }
         guard paths.count != 1 else { return paths[0] }
 
-        let driveSplit = paths.map { splitdrive(normpath($0).lowercased()) }
+        let driveSplit = paths.map { splitdrive(normpath($0.path).lowercased()) }
         var splitPaths = driveSplit.map { $0.1.split(separator: sep.first!) }
 
         guard
             (driveSplit.allSatisfy({ $0.1.hasPrefix(sep) })
                 || driveSplit.allSatisfy({ !$0.1.hasPrefix(sep) }))
                 && driveSplit.allSatisfy({ $0.0 == driveSplit[0].0 })
-        else { return "" }
+        else { return T.init("") }
 
-        let (drive, path) = splitdrive(normcase(paths[0]))
-        var common = path.split(separator: sep.first!)
+        let (drive, pathStr) = splitdrive(normcase(paths[0].path))
+        var common = pathStr.split(separator: sep.first!)
         common = common.filter { $0 != curdir }
         splitPaths = splitPaths.map { $0.filter { $0 != curdir } }
 
         let (s1, s2) = splitPaths.minmax()!
-        let pre = path.hasPrefix(sep) ? drive + sep : drive
+        let pre = pathStr.hasPrefix(sep) ? drive + sep : drive
         for i in 0..<s1.count {
             if s1[i] != s2[i] {
-                return pre + common[..<i].joined(separator: sep)
+                return T.init(pre + common[..<i].joined(separator: sep))
             }
         }
-        return pre + common.joined(separator: sep)
+        return T.init(pre + common.joined(separator: sep))
     }
 }
