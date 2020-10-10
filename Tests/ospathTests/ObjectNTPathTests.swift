@@ -129,254 +129,119 @@ final class ObjectNTPathTests: XCTestCase {
     }
 
     func testSplit() {
-        XCTAssert(NTPath.split("c:\\foo\\ba") == ("c:\\foo", "ba"))
+        XCTAssert(NTPath("c:\\foo\\ba").split == (NTPath("c:\\foo"), NTPath("ba")))
         XCTAssert(
-            NTPath.split("\\\\conky\\mountpoint\\foo\\ba") == (
-                "\\\\conky\\mountpoint\\foo", "ba"
+            NTPath("\\\\conky\\mountpoint\\foo\\ba").split == (
+                NTPath("\\\\conky\\mountpoint\\foo"), NTPath("ba")
             )
         )
 
-        XCTAssert(NTPath.split("c:\\") == ("c:\\", ""))
+        XCTAssert(NTPath("c:\\").split == (NTPath("c:\\"), NTPath("")))
         XCTAssert(
-            NTPath.split("\\\\conky\\mountpoint\\") == (
-                "\\\\conky\\mountpoint\\", ""
+            NTPath("\\\\conky\\mountpoint\\").split == (
+                NTPath("\\\\conky\\mountpoint\\"), NTPath("")
             )
         )
 
-        XCTAssert(NTPath.split("c:/") == ("c:/", ""))
+        XCTAssert(NTPath("c:/").split == (NTPath("c:/"), NTPath("")))
         XCTAssert(
-            NTPath.split("//conky/mountpoint/") == ("//conky/mountpoint/", "")
+            NTPath("//conky/mountpoint/").split == (NTPath("//conky/mountpoint/"), NTPath(""))
         )
     }
 
     func testSplitext() {
-        XCTAssert(NTPath.splitext("foo.ext") == ("foo", ".ext"))
-        XCTAssert(NTPath.splitext("/foo/foo.ext") == ("/foo/foo", ".ext"))
-        XCTAssert(NTPath.splitext(".ext") == (".ext", ""))
-        XCTAssert(NTPath.splitext("\\foo.ext\\foo") == ("\\foo.ext\\foo", ""))
-        XCTAssert(NTPath.splitext("foo.ext\\") == ("foo.ext\\", ""))
-        XCTAssert(NTPath.splitext("") == ("", ""))
-        XCTAssert(NTPath.splitext("foo.bar.ext") == ("foo.bar", ".ext"))
-        XCTAssert(NTPath.splitext("xx/foo.bar.ext") == ("xx/foo.bar", ".ext"))
-        XCTAssert(NTPath.splitext("xx\\foo.bar.ext") == ("xx\\foo.bar", ".ext"))
-        XCTAssert(NTPath.splitext("c:a/b\\c.d") == ("c:a/b\\c", ".d"))
+        XCTAssert(NTPath("foo.ext").splitext == (NTPath("foo"), NTPath(".ext")))
+        XCTAssert(NTPath("/foo/foo.ext").splitext == (NTPath("/foo/foo"), NTPath(".ext")))
+        XCTAssert(NTPath(".ext").splitext == (NTPath(".ext"), NTPath("")))
+        XCTAssert(NTPath("\\foo.ext\\foo").splitext == (NTPath("\\foo.ext\\foo"), NTPath("")))
+        XCTAssert(NTPath("foo.ext\\").splitext == (NTPath("foo.ext\\"), NTPath("")))
+        XCTAssert(NTPath("").splitext == (NTPath(""), NTPath("")))
+        XCTAssert(NTPath("foo.bar.ext").splitext == (NTPath("foo.bar"), NTPath(".ext")))
+        XCTAssert(NTPath("xx/foo.bar.ext").splitext == (NTPath("xx/foo.bar"), NTPath(".ext")))
+        XCTAssert(NTPath("xx\\foo.bar.ext").splitext == (NTPath("xx\\foo.bar"), NTPath(".ext")))
+        XCTAssert(NTPath("c:a/b\\c.d").splitext == (NTPath("c:a/b\\c"), NTPath(".d")))
     }
 
     func testSplitdrive() {
-        XCTAssert(NTPath.splitdrive("c:\\foo\\ba") == ("c:", "\\foo\\ba"))
-        XCTAssert(NTPath.splitdrive("c:/foo/ba") == ("c:", "/foo/ba"))
+        XCTAssert(NTPath("c:\\foo\\ba").splitdrive == (NTPath("c:"), NTPath("\\foo\\ba")))
+        XCTAssert(NTPath("c:/foo/ba").splitdrive == (NTPath("c:"), NTPath("/foo/ba")))
         XCTAssert(
-            NTPath.splitdrive("\\\\conky\\mountpoint\\foo\\ba") == (
-                "\\\\conky\\mountpoint", "\\foo\\ba"
+            NTPath("\\\\conky\\mountpoint\\foo\\ba").splitdrive == (
+                NTPath("\\\\conky\\mountpoint"), NTPath("\\foo\\ba")
             )
         )
         XCTAssert(
-            NTPath.splitdrive("//conky/mountpoint/foo/ba") == (
-                "//conky/mountpoint", "/foo/ba"
+            NTPath("//conky/mountpoint/foo/ba").splitdrive == (
+                NTPath("//conky/mountpoint"), NTPath("/foo/ba")
             )
         )
         XCTAssert(
-            NTPath.splitdrive("\\\\\\conky\\mountpoint\\foo\\ba") == (
-                "", "\\\\\\conky\\mountpoint\\foo\\ba"
+            NTPath("\\\\\\conky\\mountpoint\\foo\\ba").splitdrive == (
+                NTPath(""), NTPath("\\\\\\conky\\mountpoint\\foo\\ba")
             )
         )
         XCTAssert(
-            NTPath.splitdrive("///conky/mountpoint/foo/ba") == (
-                "", "///conky/mountpoint/foo/ba"
+            NTPath("///conky/mountpoint/foo/ba").splitdrive == (
+                NTPath(""), NTPath("///conky/mountpoint/foo/ba")
             )
         )
         XCTAssert(
-            NTPath.splitdrive("\\\\conky\\\\mountpoint\\foo\\ba") == (
-                "", "\\\\conky\\\\mountpoint\\foo\\ba"
+            NTPath("\\\\conky\\\\mountpoint\\foo\\ba").splitdrive == (
+                NTPath(""), NTPath("\\\\conky\\\\mountpoint\\foo\\ba")
             )
         )
         XCTAssert(
-            NTPath.splitdrive("//conky//mountpoint/foo/ba") == (
-                "", "//conky//mountpoint/foo/ba"
+            NTPath("//conky//mountpoint/foo/ba").splitdrive == (
+                NTPath(""), NTPath("//conky//mountpoint/foo/ba")
             )
         )
     }
 
     func testBasename() {
-        XCTAssertEqual(NTPath.basename("/foo/ba"), "ba")
-        XCTAssertEqual(NTPath.basename("/"), "")
-        XCTAssertEqual(NTPath.basename("foo"), "foo")
-        XCTAssertEqual(NTPath.basename("////foo"), "foo")
-        XCTAssertEqual(NTPath.basename("//foo//ba"), "ba")
+        XCTAssertEqual(NTPath("/foo/ba").basename, NTPath("ba"))
+        XCTAssertEqual(NTPath("/").basename, NTPath(""))
+        XCTAssertEqual(NTPath("foo").basename, NTPath("foo"))
+        XCTAssertEqual(NTPath("////foo").basename, NTPath("foo"))
+        XCTAssertEqual(NTPath("//foo//ba").basename, NTPath("ba"))
     }
 
     func testDirname() {
-        XCTAssertEqual(NTPath.dirname("/foo/ba"), "/foo")
-        XCTAssertEqual(NTPath.dirname("/"), "/")
-        XCTAssertEqual(NTPath.dirname("foo"), "")
-        XCTAssertEqual(NTPath.dirname("////foo"), "////")
-        XCTAssertEqual(NTPath.dirname("//foo//ba"), "//foo")
+        XCTAssertEqual(NTPath("/foo/ba").dirname, NTPath("/foo"))
+        XCTAssertEqual(NTPath("/").dirname, NTPath("/"))
+        XCTAssertEqual(NTPath("foo").dirname, NTPath(""))
+        XCTAssertEqual(NTPath("////foo").dirname, NTPath("////"))
+        XCTAssertEqual(NTPath("//foo//ba").dirname, NTPath("//foo"))
     }
 
     func testNormpath() {
-        XCTAssertEqual(NTPath.normpath("A//////././//.//B"), "A\\B")
-        XCTAssertEqual(NTPath.normpath("A/./B"), "A\\B")
-        XCTAssertEqual(NTPath.normpath("A/foo/../B"), "A\\B")
-        XCTAssertEqual(NTPath.normpath("C:A//B"), "C:A\\B")
-        XCTAssertEqual(NTPath.normpath("D:A/./B"), "D:A\\B")
-        XCTAssertEqual(NTPath.normpath("e:A/foo/../B"), "e:A\\B")
+        XCTAssertEqual(NTPath("A//////././//.//B").normpath, NTPath("A\\B"))
+        XCTAssertEqual(NTPath("A/./B").normpath, NTPath("A\\B"))
+        XCTAssertEqual(NTPath("A/foo/../B").normpath, NTPath("A\\B"))
+        XCTAssertEqual(NTPath("C:A//B").normpath, NTPath("C:A\\B"))
+        XCTAssertEqual(NTPath("D:A/./B").normpath, NTPath("D:A\\B"))
+        XCTAssertEqual(NTPath("e:A/foo/../B").normpath, NTPath("e:A\\B"))
 
-        XCTAssertEqual(NTPath.normpath("C:///A//B"), "C:\\A\\B")
-        XCTAssertEqual(NTPath.normpath("D:///A/./B"), "D:\\A\\B")
-        XCTAssertEqual(NTPath.normpath("e:///A/foo/../B"), "e:\\A\\B")
+        XCTAssertEqual(NTPath("C:///A//B").normpath, NTPath("C:\\A\\B"))
+        XCTAssertEqual(NTPath("D:///A/./B").normpath, NTPath("D:\\A\\B"))
+        XCTAssertEqual(NTPath("e:///A/foo/../B").normpath, NTPath("e:\\A\\B"))
 
-        XCTAssertEqual(NTPath.normpath(".."), "..")
-        XCTAssertEqual(NTPath.normpath("."), ".")
-        XCTAssertEqual(NTPath.normpath(""), ".")
-        XCTAssertEqual(NTPath.normpath("/"), "\\")
-        XCTAssertEqual(NTPath.normpath("c:/"), "c:\\")
-        XCTAssertEqual(NTPath.normpath("/../.././.."), "\\")
-        XCTAssertEqual(NTPath.normpath("c:/../../.."), "c:\\")
-        XCTAssertEqual(NTPath.normpath("../.././.."), "..\\..\\..")
-        XCTAssertEqual(NTPath.normpath("K:../.././.."), "K:..\\..\\..")
-        XCTAssertEqual(NTPath.normpath("C:////a/b"), "C:\\a\\b")
+        XCTAssertEqual(NTPath("..").normpath, NTPath(".."))
+        XCTAssertEqual(NTPath(".").normpath, NTPath("."))
+        XCTAssertEqual(NTPath("").normpath, NTPath("."))
+        XCTAssertEqual(NTPath("/").normpath, NTPath("\\"))
+        XCTAssertEqual(NTPath("c:/").normpath, NTPath("c:\\"))
+        XCTAssertEqual(NTPath("/../.././..").normpath, NTPath("\\"))
+        XCTAssertEqual(NTPath("c:/../../..").normpath, NTPath("c:\\"))
+        XCTAssertEqual(NTPath("../.././..").normpath, NTPath("..\\..\\.."))
+        XCTAssertEqual(NTPath("K:../.././..").normpath, NTPath("K:..\\..\\.."))
+        XCTAssertEqual(NTPath("C:////a/b").normpath, NTPath("C:\\a\\b"))
         XCTAssertEqual(
-            NTPath.normpath("//machine/share//a/b"),
-            "\\\\machine\\share\\a\\b"
-        )
-
-        XCTAssertEqual(NTPath.normpath("\\\\.\\NUL"), "\\\\.\\NUL")
-
-    }
-
-    func testRealpath() {
-        XCTAssertEqual(NTPath.realpath("."), NTPath.normpath(OS.getcwd()))
-        XCTAssertEqual(NTPath.realpath("./."), NTPath.normpath(OS.getcwd()))
-        XCTAssertEqual(
-            NTPath.realpath(".."),
-            NTPath.dirname(NTPath.normpath(OS.getcwd()))
-        )
-        XCTAssertEqual(
-            NTPath.realpath("../.."),
-            NTPath.dirname(NTPath.dirname(NTPath.normpath(OS.getcwd())))
-        )
-        XCTAssertEqual(
-            NTPath.realpath(
-                [String](repeating: ".", count: 100).joined(separator: "/")
-            ),
-            NTPath.normpath(OS.getcwd())
-        )
-    }
-
-    func testRealpathBasic() {
-        let filename = "sdafsdfhdsufhisfu232u3fjds"
-        let newfile = filename + "1"
-        let link = filename + "2"
-        _ = try? OS.remove(newfile)
-        _ = try? OS.remove(link)
-
-        if OS.open(newfile) {
-            _ = try? OS.symlink(newfile, link)
-            XCTAssertEqual(NTPath.realpath(link), NTPath.abspath(newfile))
-            _ = try? OS.remove(newfile)
-            _ = try? OS.remove(link)
-        }
-    }
-
-    func testCommonpath() {
-        XCTAssertEqual(
-            NTPath.commonpath(["C:\\Program Files"]),
-            "C:\\Program Files"
-        )
-        XCTAssertEqual(
-            NTPath.commonpath(["C:\\Program Files", "C:\\Program Files"]),
-            "C:\\Program Files"
-        )
-        XCTAssertEqual(
-            NTPath.commonpath(["C:\\Program Files\\", "C:\\Program Files"]),
-            "C:\\Program Files"
-        )
-        XCTAssertEqual(
-            NTPath.commonpath(["C:\\Program Files\\", "C:\\Program Files\\"]),
-            "C:\\Program Files"
-        )
-        XCTAssertEqual(
-            NTPath.commonpath(["C:\\\\Program Files", "C:\\Program Files\\\\"]),
-            "C:\\Program Files"
-        )
-        XCTAssertEqual(
-            NTPath.commonpath(["C:\\.\\Program Files", "C:\\Program Files\\."]),
-            "C:\\Program Files"
-        )
-        XCTAssertEqual(NTPath.commonpath(["C:\\", "C:\\bin"]), "C:\\")
-        XCTAssertEqual(
-            NTPath.commonpath(["C:\\Program Files", "C:\\bin"]),
-            "C:\\"
-        )
-        XCTAssertEqual(
-            NTPath.commonpath(["C:\\Program Files", "C:\\Program Files\\Bar"]),
-            "C:\\Program Files"
-        )
-        XCTAssertEqual(
-            NTPath.commonpath([
-                "C:\\Program Files\\Foo", "C:\\Program Files\\Bar",
-            ]),
-            "C:\\Program Files"
-        )
-        XCTAssertEqual(
-            NTPath.commonpath(["C:\\Program Files", "C:\\Projects"]),
-            "C:\\"
-        )
-        XCTAssertEqual(
-            NTPath.commonpath(["C:\\Program Files\\", "C:\\Projects"]),
-            "C:\\"
+            NTPath("//machine/share//a/b").normpath,
+            NTPath("\\\\machine\\share\\a\\b")
         )
 
-        XCTAssertEqual(
-            NTPath.commonpath([
-                "C:\\Program Files\\Foo", "C:/Program Files/Bar",
-            ]),
-            "C:\\Program Files"
-        )
-        XCTAssertEqual(
-            NTPath.commonpath([
-                "C:\\Program Files\\Foo", "c:/program files/bar",
-            ]),
-            "C:\\Program Files"
-        )
-        XCTAssertEqual(
-            NTPath.commonpath([
-                "c:/program files/bar", "C:\\Program Files\\Foo",
-            ]),
-            "c:\\program files"
-        )
+        XCTAssertEqual(NTPath("\\\\.\\NUL").normpath, NTPath("\\\\.\\NUL"))
 
-    }
-
-    func testCommonprefix() {
-        XCTAssertEqual(
-            NTPath.commonprefix([]),
-            ""
-        )
-        XCTAssertEqual(
-            NTPath.commonprefix(["/home/swenson/spam", "/home/swen/spam"]),
-            "/home/swen"
-        )
-        XCTAssertEqual(
-            NTPath.commonprefix(["/home/swen/spam", "/home/swen/eggs"]),
-            "/home/swen/"
-        )
-        XCTAssertEqual(
-            NTPath.commonprefix(["/home/swen/spam", "/home/swen/spam"]),
-            "/home/swen/spam"
-        )
-        XCTAssertEqual(
-            NTPath.commonprefix(["home:swenson:spam", "home:swen:spam"]),
-            "home:swen"
-        )
-        XCTAssertEqual(
-            NTPath.commonprefix([":home:swen:spam", ":home:swen:eggs"]),
-            ":home:swen:"
-        )
-        XCTAssertEqual(
-            NTPath.commonprefix([":home:swen:spam", ":home:swen:spam"]),
-            ":home:swen:spam"
-        )
     }
 
     static var allTests = [
@@ -388,9 +253,5 @@ final class ObjectNTPathTests: XCTestCase {
         ("testBasename", testBasename),
         ("testDirname", testDirname),
         ("testNormpath", testNormpath),
-        ("testRealpath", testRealpath),
-        ("testRealpathBasic", testRealpathBasic),
-        ("testCommonpath", testCommonpath),
-        ("testCommonprefix", testCommonprefix),
     ]
 }
