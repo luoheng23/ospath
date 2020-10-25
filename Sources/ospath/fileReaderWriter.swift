@@ -137,7 +137,7 @@ public class FileReader {
     }
 }
 
-
+@available(macOS 10.15, *)
 extension FileReader: Sequence {
     open func makeIterator() -> AnyIterator<String> {
         return AnyIterator {
