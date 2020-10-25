@@ -24,6 +24,7 @@
 import Foundation
 
 /// It reads from a file in chunks and converts complete lines to strings.
+@available(macOS 10.15, *)
 public class FileReader {
     let encoding: String.Encoding
     let chunkSize: Int
@@ -147,6 +148,7 @@ extension FileReader: Sequence {
 
 
 /// It reads from a file in chunks and converts complete lines to strings.
+@available(macOS 10.15, *)
 public class FileWriter {
     let encoding: String.Encoding
     let delimiterData: String
