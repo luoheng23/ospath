@@ -3,6 +3,7 @@ import XCTest
 @testable import ospath
 
 // TODO
+@available(macOS 10.15, *)
 final class FileReaderWriterTests: XCTestCase {
 
     func testRead() {
